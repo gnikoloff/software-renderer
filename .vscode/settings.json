@@ -4,6 +4,11 @@
 		"*.tsx": "typescriptreact",
 		"stdbool.h": "c",
 		"sdl.h": "c",
-		"vector.h": "c"
+		"vector.h": "c",
+		"display.h": "c",
+		"stdint.h": "c",
+		"__node_handle": "c",
+		"stdio.h": "c",
+		"string.h": "c"
 	}
 }
