@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "stdio.h"
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +10,29 @@
 static mesh_t meshes[MAX_NUM_MESHES];
 static int mesh_count = 0;
 
+void mesh_set_scale(mesh_t *mesh, float sx, float sy, float sz) {
+    mesh->scale.x = sx;
+    mesh->scale.y = sy;
+    mesh->scale.z = sz;
+    mesh->scale_matrix = mat4_make_scale(sx, sy, sz);
+}
+
+void mesh_set_translation(mesh_t *mesh, float tx, float ty, float tz) {
+    mesh->translation.x = tx;
+    mesh->translation.y = ty;
+    mesh->translation.z = tz;
+    mesh->translation_matrix = mat4_make_translation(tx, ty, tz);
+}
+
+void mesh_update_world_matrix(mesh_t *mesh) {
+    mesh->world_matrix = mat4_identity();
+    mesh->world_matrix = mat4_mul_mat4(mesh->scale_matrix, mesh->world_matrix);
+    // mat4_mul_mat4(&mesh->world_matrix, &mesh->rotation_matrix_x, &mesh->world_matrix);
+    // mat4_mul_mat4(&mesh->world_matrix, &mesh->rotation_matrix_y, &mesh->world_matrix);
+    // mat4_mul_mat4(&mesh->world_matrix, &mesh->rotation_matrix_z, &mesh->world_matrix);
+    mesh->world_matrix = mat4_mul_mat4(mesh->translation_matrix, mesh->world_matrix);
+}
+
 void load_mesh(
     char* obj_filename,
     char* png_filename,
@@ -16,12 +40,16 @@ void load_mesh(
     vec3_t translation,
     vec3_t rotation
 ) {
-    load_mesh_obj_data(&meshes[mesh_count], obj_filename);
-    load_mesh_png_data(&meshes[mesh_count], png_filename);
+    printf("Create mesh %d\n", mesh_count);
+	assert(mesh_count < MAX_NUM_MESHES);
+    mesh_t *mesh = &meshes[mesh_count];
+    load_mesh_obj_data(mesh, obj_filename);
+    load_mesh_png_data(mesh, png_filename);
 
-    meshes[mesh_count].scale = scale;
-    meshes[mesh_count].translation = translation;
-    meshes[mesh_count].rotation = rotation;
+    mesh->rotation = rotation;
+
+    mesh_set_scale(mesh, scale.x, scale.y, scale.z);
+    mesh_set_translation(mesh, translation.x, translation.y, translation.z);
 
     mesh_count++;
 }

@@ -200,16 +200,11 @@ void draw_filled_triangle(
 //   / /         \ \
 //  A ------------ C
 vec3_t barycentric_weights(vec2_t a, vec2_t b, vec2_t c, vec2_t p) {
-	vec2_t ac;
-	vec2_sub(&ac, &c, &a);
-	vec2_t ab;
-	vec2_sub(&ab, &b, &a);
-	vec2_t ap;
-	vec2_sub(&ap, &p, &a);
-	vec2_t pc;
-	vec2_sub(&pc, &c, &p);
-	vec2_t pb;
-	vec2_sub(&pb, &b, &p);
+	vec2_t ac = vec2_sub(c, a);
+	vec2_t ab = vec2_sub(b, a);
+	vec2_t ap = vec2_sub(p, a);
+	vec2_t pc = vec2_sub(c, p);
+	vec2_t pb = vec2_sub(b, p);
 
 	// Compute the area of the full parallelogram/triangle ABC using 2D cross product
 	float area_parallelogram_abc = (ac.x * ab.y - ac.y * ab.x); // || AC x AB ||
@@ -231,9 +226,9 @@ void draw_triangle_pixel(
 	vec4_t point_a, vec4_t point_b, vec4_t point_c
 ) {
 	vec2_t p = { x, y };
-	vec2_t a = vec2_from_vec4(&point_a);
-	vec2_t b = vec2_from_vec4(&point_b);
-	vec2_t c = vec2_from_vec4(&point_c);
+	vec2_t a = vec2_from_vec4(point_a);
+	vec2_t b = vec2_from_vec4(point_b);
+	vec2_t c = vec2_from_vec4(point_c);
 	vec3_t weights = barycentric_weights(a, b, c, p);
 	float alpha = weights.x;
 	float beta = weights.y;
@@ -264,9 +259,9 @@ void draw_texel(
 	tex2_t a_uv, tex2_t b_uv, tex2_t c_uv
 ) {
 	vec2_t p = { x, y };
-	vec2_t a = vec2_from_vec4(&point_a);
-	vec2_t b = vec2_from_vec4(&point_b);
-	vec2_t c = vec2_from_vec4(&point_c);
+	vec2_t a = vec2_from_vec4(point_a);
+	vec2_t b = vec2_from_vec4(point_b);
+	vec2_t c = vec2_from_vec4(point_c);
 	vec3_t weights = barycentric_weights(a, b, c, p);
 	float alpha = weights.x;
 	float beta = weights.y;

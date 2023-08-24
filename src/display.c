@@ -72,7 +72,7 @@ void update_zbuffer_at(int x, int y, float value) {
 }
 
 bool initialize_window(void) {
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		fprintf(stderr, "Error initializing SDL.\n");
 		return false;
 	}
@@ -83,8 +83,8 @@ bool initialize_window(void) {
 	int fullscreen_width = display_mode.w;
 	int fullscreen_height = display_mode.h;
 
-	window_width = fullscreen_width / 2;
-	window_height = fullscreen_height / 2;
+	window_width = 500;
+	window_height = 300;
 	
 	window = SDL_CreateWindow(
 		NULL,
@@ -106,7 +106,10 @@ bool initialize_window(void) {
 		return false;
 	}
 
-	SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+	#ifndef __EMSCRIPTEN__
+		// SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+		SDL_SetWindowSize(window, window_width, window_height);
+	#endif
 	
 	color_buffer = (uint32_t*) malloc(sizeof(uint32_t) * window_width * window_height);
 	z_buffer = (float*) malloc(sizeof(float) * window_width * window_height);

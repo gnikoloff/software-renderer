@@ -1,3 +1,6 @@
+#ifdef __EMSCRIPTEN__
+	#include "emscripten.h"
+#endif
 #include "stdio.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,15 +26,7 @@ bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
 
-mat4_t proj_matrix;
-mat4_t world_matrix;
-mat4_t view_matrix;
-mat4_t model_view_matrix;
-mat4_t scale_matrix;
-mat4_t translate_matrix;
-mat4_t rotation_matrix_x;
-mat4_t rotation_matrix_y;
-mat4_t rotation_matrix_z;
+camera_t* camera = NULL;
 
 void setup(void) {
 	set_render_method(RENDER_WIRE);
@@ -41,43 +36,60 @@ void setup(void) {
 		"./assets/crab.obj",
 		"./assets/crab.png",
 		vec3_new(1, 1, 1),
-		vec3_new(-3, 0, 0),
+		vec3_new(0, 0, 0),
 		vec3_new(0, 0, 0)
 	);
 
-	load_mesh(
-		"./assets/crab.obj",
-		"./assets/crab.png",
-		vec3_new(1, 1, 1),
-		vec3_new(3, 0, 0),
-		vec3_new(0, 0, 0)
-	);
+	// load_mesh(
+	// 	"./assets/crab.obj",
+	// 	"./assets/crab.png",
+	// 	vec3_new(1, 1, 1),
+	// 	vec3_new(1, 0, 0),
+	// 	vec3_new(0, 0, 0)
+	// );
 
 	// Initialize the scene light direction
 	init_light(vec3_new(0, 0, 1));
 
 	// Initialize the perspective projection matrix
-	float aspectx = (float)get_window_width() / get_window_height();
-	float aspecty = (float)get_window_height() / get_window_width();
-	float fovy = 3.14 / 3.0;
+	float aspectx = (float)get_window_width() / (float)get_window_height();
+	float aspecty = (float)get_window_height() / (float)get_window_width();
+	float fovy = 3.141592 / 3.0;
 	float fovx = atan(tan(fovy / 2) * aspectx) * 2;
-	float z_near = 0.1;
+	float z_near = 1.0;
 	float z_far = 100.0;
-	proj_matrix = mat4_make_perspective(fovy, aspecty, z_near, z_far);
+
+	vec3_t cam_position = { .x = 0, .y = 0, .z = -5 };
+	vec3_t cam_target = { .x = 0, .y = 0, .z = 0 };
+	camera = make_perspective_camera(fovy, aspecty, z_near, z_far, cam_position, cam_target);
 	
 	init_frustum_planes(fovx, fovy, z_near, z_far);
-
 }
 
 void process_input(void) {
-
-	static camera_direction = { 0, 0, 0 };
+	static vec3_t camera_direction = { 0, 0, 0 };
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 		case SDL_QUIT:
 			is_running = false;
+			break;
+		case SDL_MOUSEMOTION:
+			if (event.motion.state & SDL_BUTTON_LMASK) {
+				update_camera_on_drag(camera, event.motion.xrel, event.motion.yrel);
+			}
+			break;
+		case SDL_MOUSEWHEEL:
+			camera->distance += -event.wheel.preciseY * 0.01 * delta_time;
+			printf("%f\n", event.wheel.preciseY);
+			update_camera_on_drag(camera, 0, 0);
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			// ...
+			break;
+		case SDL_MOUSEBUTTONUP:
+			// ...
 			break;
 		case SDL_KEYDOWN:
 			if (event.key.keysym.sym == SDLK_ESCAPE) {
@@ -116,30 +128,32 @@ void process_input(void) {
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_UP) {
-				add_camera_position_y(0.01 * delta_time);
+				// add_camera_position_y(0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_DOWN) {
-				add_camera_position_y(-0.01 * delta_time);
+				// add_camera_position_y(-0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_a) {
-				add_camera_yaw(0.01 * delta_time);
+				// add_camera_yaw(0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_d) {
-				add_camera_yaw(-0.01 * delta_time);
+				// add_camera_yaw(-0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_q) {
-				add_camera_pitch(0.01 * delta_time);
+				// add_camera_pitch(0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_e) {
-				add_camera_pitch(-0.01 * delta_time);
+				// add_camera_pitch(-0.01 * delta_time);
 				break;
 			}
 			if (event.key.keysym.sym == SDLK_w) {
+				camera->position.z += 0.1;
+				update_camera_view_matrix(camera);
 				// vec3_mul(&camera_direction, get_camera_direction(), 0.1 * delta_time);
 				// set_camera_forward_velocity(&camera_direction);
 				// set_camera_position(vec3_add(get_camera_position(), get_camera_forward_velocity()));
@@ -156,7 +170,6 @@ void process_input(void) {
 }
 
 void update(void) {
-
 	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
 	if (time_to_wait > 0 && time_to_wait < FRAME_TARGET_TIME) {
 		SDL_Delay(time_to_wait);
@@ -168,40 +181,10 @@ void update(void) {
 
 	num_triangles_to_render = 0;
 
-	// Create a view matrix
-	// TODO: compute the new camera rotation and translation for FPS camera movement
-	// Initialize the target
-	vec3_t target = vec3_new(0, 0, 1);
-	vec4_t target4 = vec4_new(0, 0, 1, 1);
-	mat4_t camera_yaw_rotation;
-	mat4_make_rotation_y(&camera_yaw_rotation, get_camera_yaw());
-	mat4_t camera_pitch_rotation;
-	mat4_make_rotation_x(&camera_pitch_rotation, get_camera_pitch());
-	// mat4_mul_vec4(camera_yaw_rotation, vec4_from_vec3(target)))
-	mat4_mul_vec4(&target4, &camera_yaw_rotation, &target4);
-	mat4_mul_vec4(&target4, &camera_pitch_rotation, &target4);
-
-	target = vec3_from_vec4(&target4);
-
-	set_camera_direction(target);
-
-
-	// Offset the camera position in the direction where the camera is pointing at
-	vec3_add(&target, get_camera_position(), get_camera_direction());
-
-	vec3_t up = { 0, 1, 0 };
-	mat4_look_at(&view_matrix, get_camera_position(), &target, &up);
-
 	// Loop all the meshes of our scene
 	for (int mesh_index = 0; mesh_index < get_meshes_count(); mesh_index++) {
 		mesh_t* mesh = get_mesh(mesh_index);
-
-		// Create a scale, translation and rotation matrices that will be used to multiply the mesh vertices
-		mat4_make_scale(&scale_matrix, mesh->scale.x, mesh->scale.y, mesh->scale.z);
-		mat4_make_translation(&translate_matrix, mesh->translation.x, mesh->translation.y, mesh->translation.z);
-		mat4_make_rotation_x(&rotation_matrix_x, mesh->rotation.x);
-		mat4_make_rotation_y(&rotation_matrix_y, mesh->rotation.y);
-		mat4_make_rotation_z(&rotation_matrix_z, mesh->rotation.z);
+		mesh_update_world_matrix(mesh);
 
 		int num_faces = array_length(mesh->faces);
 
@@ -219,48 +202,35 @@ void update(void) {
 			// First we transform the vertices in world spacw
 
 			for (int j = 0; j < 3; j++) {
-				vec4_t transformed_vertex = vec4_from_vec3(&face_vertices[j]);
-
-				// Create a World Matrix combining scale, rotation and translation matrices
-				mat4_identity(&world_matrix);
-				mat4_mul_mat4(&world_matrix, &scale_matrix, &world_matrix);
-				mat4_mul_mat4(&world_matrix, &rotation_matrix_x, &world_matrix);
-				mat4_mul_mat4(&world_matrix, &rotation_matrix_y, &world_matrix);
-				mat4_mul_mat4(&world_matrix, &rotation_matrix_z, &world_matrix);
-				mat4_mul_mat4(&world_matrix, &translate_matrix, &world_matrix);
-
-				mat4_mul_mat4(&model_view_matrix, &view_matrix, &world_matrix);
-
+				vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 				// Save transformed vertex in the array of transformed vertices
-				mat4_mul_vec4(&transformed_vertices[j], &model_view_matrix, &transformed_vertex);
+				transformed_vertices[j] = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
+				transformed_vertices[j] = mat4_mul_vec4(camera->view_matrix, transformed_vertices[j]);
+				// transformed_vertices[j] = transformed_vertex;
 			}
 
 			// Second we perform backface culling and disregard backfacing triangles
-			vec3_t vector_a = vec3_from_vec4(&transformed_vertices[0]); /*   A   */
-			vec3_t vector_b = vec3_from_vec4(&transformed_vertices[1]); /*  / \  */
-			vec3_t vector_c = vec3_from_vec4(&transformed_vertices[2]); /* C---B */
+			vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
+			vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]); /*  / \  */
+			vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]); /* C---B */
 
 			// Get the vector subtraction of B-A and C-a
-			vec3_t vector_ab;
-			vec3_sub(&vector_ab, &vector_b, &vector_a);
+			vec3_t vector_ab = vec3_sub(vector_b, vector_a);
 			vec3_normalize(&vector_ab);
-			vec3_t vector_ac;
-			vec3_sub(&vector_ac, &vector_c, &vector_a);
+			vec3_t vector_ac = vec3_sub(vector_c, vector_a);
 			vec3_normalize(&vector_ac);
 			
 			// Compute the face normal using cross product
-			vec3_t vector_normal;
-			vec3_cross(&vector_normal, &vector_ab, &vector_ac);
+			vec3_t vector_normal = vec3_cross(vector_ab, vector_ac);
 			vec3_normalize(&vector_normal);
 
 			// Find the vector between a point in the triangle and the camera origin
 			// Our camera is always at origin (0 0 0) (camera space)
 			vec3_t origin = { 0, 0, 0 };
-			vec3_t camera_ray;
-			vec3_sub(&camera_ray, &origin, &vector_a);
+			vec3_t camera_ray = vec3_sub(origin, vector_a);
 
 			// Calculate how aligned the camera_ray is with the face normal using dot product
-			float dot_normal_camera = vec3_dot(&vector_normal, &camera_ray);
+			float dot_normal_camera = vec3_dot(vector_normal, camera_ray);
 
 			if (is_cull_backface()) {
 				if (dot_normal_camera < 0) {
@@ -270,9 +240,9 @@ void update(void) {
 
 			// Create a polygon from the original transformed triangle to be clipped
 			polygon_t polygon = create_polygon_from_triangles(
-				vec3_from_vec4(&transformed_vertices[0]),
-				vec3_from_vec4(&transformed_vertices[1]),
-				vec3_from_vec4(&transformed_vertices[2]),
+				vec3_from_vec4(transformed_vertices[0]),
+				vec3_from_vec4(transformed_vertices[1]),
+				vec3_from_vec4(transformed_vertices[2]),
 				face.a_uv,
 				face.b_uv,
 				face.c_uv
@@ -293,10 +263,9 @@ void update(void) {
 
 				vec4_t projected_points[3];
 
-				// Third we project the frontfacing triangles
 				for (int j = 0; j < 3; j++) {
 					// Multiply point with projection matrix and perspective divide!
-					mat4_mul_vec4_project(&projected_points[j], &proj_matrix, &triangle_after_clipping.points[j]);
+					projected_points[j] = mat4_mul_vec4_project(camera->projection_matrix, triangle_after_clipping.points[j]);
 
 					float half_window_width = get_window_width() / 2.0;
 					float half_window_height = get_window_height() / 2.0;
@@ -320,12 +289,12 @@ void update(void) {
 				}
 
 				// Calculate the shade intensity based on how aligned the face normal is with the light direction
-				float light_intensity_factor = -vec3_dot(&vector_normal, get_light_direction());
+				// float light_intensity_factor = -vec3_dot(&vector_normal, get_light_direction());
 
 				// Calculate the triangle color based on the light angle
 				uint32_t triangle_color = face.color;
 
-				triangle_color = light_apply_intensity(triangle_color, light_intensity_factor);
+				// triangle_color = light_apply_intensity(triangle_color, light_intensity_factor);
 
 				triangle_t triangle_to_render = {
 					.points = {
@@ -399,16 +368,25 @@ void free_resources(void) {
 	destroy_window();
 }
 
+void onFrame(void) {
+	process_input();
+	update();
+	render();
+}
+
 int main(void) {
 	is_running = initialize_window();
 
 	setup();
 
-	while(is_running) {
-		process_input();
-		update();
-		render();
-	}
+	#ifdef __EMSCRIPTEN__
+		emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+		emscripten_set_main_loop(onFrame, 0, 1);
+	#else
+		while(is_running) {
+			onFrame();
+		}
+	#endif
 
 	free_resources();
 

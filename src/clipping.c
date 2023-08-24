@@ -28,28 +28,40 @@ plane_t frustum_planes[6];
 
 
 void init_frustum_planes(float fovx, float fovy, float z_near, float z_far) {
-	float cos_half_fovx = cos(fovx / 2);
-	float sin_half_fovx = sin(fovx / 2);
-	float cos_half_fovy = cos(fovy / 2);
-	float sin_half_fovy = sin(fovy / 2);
+	float cos_half_fov_x = cos(fovx / 2);
+	float sin_half_fov_x = sin(fovx / 2);
+	float cos_half_fov_y = cos(fovy / 2);
+	float sin_half_fov_y = sin(fovy / 2);
 
 	frustum_planes[LEFT_FRUSTUM_PLANE].point = vec3_new(0, 0, 0);
-	frustum_planes[LEFT_FRUSTUM_PLANE].normal = vec3_new(cos_half_fovx, 0, sin_half_fovx);
+	frustum_planes[LEFT_FRUSTUM_PLANE].normal.x = cos_half_fov_x;
+	frustum_planes[LEFT_FRUSTUM_PLANE].normal.y = 0;
+	frustum_planes[LEFT_FRUSTUM_PLANE].normal.z = sin_half_fov_x;
 
 	frustum_planes[RIGHT_FRUSTUM_PLANE].point = vec3_new(0, 0, 0);
-	frustum_planes[RIGHT_FRUSTUM_PLANE].normal = vec3_new(-cos_half_fovx, 0, sin_half_fovx);
+	frustum_planes[RIGHT_FRUSTUM_PLANE].normal.x = -cos_half_fov_x;
+	frustum_planes[RIGHT_FRUSTUM_PLANE].normal.y = 0;
+	frustum_planes[RIGHT_FRUSTUM_PLANE].normal.z = sin_half_fov_x;
 
 	frustum_planes[TOP_FRUSTUM_PLANE].point = vec3_new(0, 0, 0);
-	frustum_planes[TOP_FRUSTUM_PLANE].normal = vec3_new(0, -cos_half_fovy, sin_half_fovy);
+	frustum_planes[TOP_FRUSTUM_PLANE].normal.x = 0;
+	frustum_planes[TOP_FRUSTUM_PLANE].normal.y = -cos_half_fov_y;
+	frustum_planes[TOP_FRUSTUM_PLANE].normal.z = sin_half_fov_y;
 
 	frustum_planes[BOTTOM_FRUSTUM_PLANE].point = vec3_new(0, 0, 0);
-	frustum_planes[BOTTOM_FRUSTUM_PLANE].normal = vec3_new(0, cos_half_fovy, sin_half_fovy);
+	frustum_planes[BOTTOM_FRUSTUM_PLANE].normal.x = 0;
+	frustum_planes[BOTTOM_FRUSTUM_PLANE].normal.y = cos_half_fov_y;
+	frustum_planes[BOTTOM_FRUSTUM_PLANE].normal.z = sin_half_fov_y;
 
 	frustum_planes[NEAR_FRUSTUM_PLANE].point = vec3_new(0, 0, z_near);
-	frustum_planes[NEAR_FRUSTUM_PLANE].normal = vec3_new(0, 0, 1);
+	frustum_planes[NEAR_FRUSTUM_PLANE].normal.x = 0;
+	frustum_planes[NEAR_FRUSTUM_PLANE].normal.y = 0;
+	frustum_planes[NEAR_FRUSTUM_PLANE].normal.z = 1;
 
 	frustum_planes[FAR_FRUSTUM_PLANE].point = vec3_new(0, 0, z_far);
-	frustum_planes[FAR_FRUSTUM_PLANE].normal = vec3_new(0, 0, -1);
+	frustum_planes[FAR_FRUSTUM_PLANE].normal.x = 0;
+	frustum_planes[FAR_FRUSTUM_PLANE].normal.y = 0;
+	frustum_planes[FAR_FRUSTUM_PLANE].normal.z = -1;
 }
 
 polygon_t create_polygon_from_triangles(vec3_t v0, vec3_t v1, vec3_t v2, tex2_t t0, tex2_t t1, tex2_t t2) {
@@ -72,9 +84,9 @@ void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int* num
 		int index1 = i + 1;
 		int index2 = i + 2;
 		
-		triangles[i].points[0] = vec4_from_vec3(&polygon->vertices[index0]);
-		triangles[i].points[1] = vec4_from_vec3(&polygon->vertices[index1]);
-		triangles[i].points[2] = vec4_from_vec3(&polygon->vertices[index2]);
+		triangles[i].points[0] = vec4_from_vec3(polygon->vertices[index0]);
+		triangles[i].points[1] = vec4_from_vec3(polygon->vertices[index1]);
+		triangles[i].points[2] = vec4_from_vec3(polygon->vertices[index2]);
 
 		triangles[i].tex_coords[0] = polygon->texcoords[index0];
 		triangles[i].tex_coords[1] = polygon->texcoords[index1];
@@ -93,29 +105,25 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 	tex2_t inside_texcoords[MAX_NUMBER_POLY_VERTICES];
 	int num_inside_vertices = 0;
 
-	// Keep track of current and prev vertice
-
-	// Start the current vertex with the first polygon vertex and texture coordinate
 	vec3_t* current_vertex = &polygon->vertices[0];
-	tex2_t* current_texcoord = &polygon->texcoords[0];
-
-	// Start the previous vertex with the last polygon vertex and texture coordinate
 	vec3_t* prev_vertex = &polygon->vertices[polygon->num_vertices - 1];
+
+	tex2_t* current_texcoord = &polygon->texcoords[0];
 	tex2_t* prev_texcoord = &polygon->texcoords[polygon->num_vertices - 1];
 
 	// Calculate the dot product of the current and previous vertex
 	float current_dot;
 	float prev_dot;
 
-	static vec3_t prev_vertex_point_diff = { 0, 0, 0 };
-	static vec3_t curr_vertex_point_diff = { 0, 0, 0 };
-	vec3_sub(&prev_vertex_point_diff, prev_vertex, &plane_point);
-	prev_dot = vec3_dot(&prev_vertex_point_diff, &plane_normal);
+	vec3_t prev_vertex_point_diff = { 0, 0, 0 };
+	vec3_t curr_vertex_point_diff = { 0, 0, 0 };
+	prev_vertex_point_diff = vec3_sub(*prev_vertex, plane_point);
+	prev_dot = vec3_dot(prev_vertex_point_diff, plane_normal);
 
 	// // Loop all the polygon vertices while the current is different than the last one
 	while (current_vertex != &polygon->vertices[polygon->num_vertices]) {
-		vec3_sub(&curr_vertex_point_diff, current_vertex, &plane_point);
-		current_dot = vec3_dot(&curr_vertex_point_diff, &plane_normal);
+		curr_vertex_point_diff = vec3_sub(*current_vertex, plane_point);
+		current_dot = vec3_dot(curr_vertex_point_diff, plane_normal);
 
 		// If we changed from inside to outside or outside to inside
 		if (current_dot * prev_dot < 0) {
