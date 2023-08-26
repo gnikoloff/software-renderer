@@ -2,6 +2,7 @@
 #include "math.h"
 
 #include "texture.h"
+#include "utils.h"
 
 #define NUM_PLANES 6
 plane_t frustum_planes[6];
@@ -72,10 +73,6 @@ polygon_t create_polygon_from_triangles(vec3_t v0, vec3_t v1, vec3_t v2, tex2_t 
 	};
 
 	return polygon;
-}
-
-float float_lerp(float a, float b, float t) {
-	return a + (b - a) * t;
 }
 
 void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int* num_triangles) {

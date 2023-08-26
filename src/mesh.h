@@ -24,7 +24,7 @@ typedef struct {
 	quat_t quaternion;
 } mesh_t;
 
-void load_mesh(
+mesh_t* load_mesh(
 	char* obj_filename,
 	char* png_filename,
 	vec3_t scale,
@@ -79,7 +79,7 @@ void init_mesh_common_properties(mesh_t* mesh);
 
 int get_meshes_count(void);
 mesh_t* get_mesh(int index);
-void dispose_mesh(int index);
+void dispose_mesh(mesh_t* mesh);
 void dispose_meshes(void);
 
 #endif

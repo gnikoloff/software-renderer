@@ -71,6 +71,7 @@ void update_zbuffer_at(int x, int y, float value) {
 	z_buffer[y * window_width + x] = value;
 }
 
+#ifdef __EMSCRIPTEN__
 EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void *rawState) {
 	printf("fired\n");
 	double fullscreen_width;
@@ -79,6 +80,7 @@ EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void
 	emscripten_set_canvas_element_size("canvas", 100, 100);
 	return 1;
 }
+#endif
 
 bool initialize_window(void) {
 	int sdl_success;
@@ -111,8 +113,8 @@ bool initialize_window(void) {
 		fullscreen_height = display_mode.h;
 	#endif
 
-	window_width = (int)fullscreen_width;
-	window_height = (int)fullscreen_height;
+	window_width = (int)(fullscreen_width);
+	window_height = (int)(fullscreen_height);
 	
 	window = SDL_CreateWindow(
 		NULL,

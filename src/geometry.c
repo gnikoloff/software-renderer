@@ -321,6 +321,7 @@ void make_ring_geometry(
 			uv.u = (vertex.x / outer_radius + 1) / 2;
 			uv.v = (vertex.y / outer_radius + 1) / 2;
 			array_push(texcoords, uv);
+			printf("UV: %f %f\n", uv.u, uv.v);
 		}
 		radius += radius_step;
 	}

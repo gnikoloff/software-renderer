@@ -166,7 +166,7 @@ void mesh_update_world_matrix(mesh_t *mesh) {
 
 }
 
-void load_mesh(
+mesh_t* load_mesh(
 	char* obj_filename,
 	char* png_filename,
 	vec3_t scale,
@@ -181,6 +181,8 @@ void load_mesh(
 	init_mesh_common_properties(mesh);
 
 	mesh_count++;
+
+	return mesh;
 }
 
 int get_meshes_count(void) {
@@ -191,8 +193,7 @@ mesh_t* get_mesh(int index) {
 	return &meshes[index];
 }
 
-void dispose_mesh(int index) {
-	mesh_t* mesh = &meshes[index];
+void dispose_mesh(mesh_t* mesh) {
 	array_free(mesh->vertices);
 	array_free(mesh->faces);
 	upng_free(mesh->texture);
@@ -200,7 +201,8 @@ void dispose_mesh(int index) {
 
 void dispose_meshes(void) {
 	for (int i = 0; i < mesh_count; i++) {
-		dispose_mesh(i);
+		mesh_t* mesh = &meshes[i];
+		dispose_mesh(mesh);
 	}
 }
 

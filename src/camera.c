@@ -33,7 +33,7 @@ camera_t* make_perspective_camera(
 	camera->target = target;
 	camera->distance = vec3_length(position);
 	camera->min_distance = 0.1;
-	camera->max_distance = 10.0;
+	camera->max_distance = 25.0;
 
 	update_camera_projection_matrix(camera);
 	update_camera_view_matrix(camera);

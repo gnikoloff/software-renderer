@@ -25,7 +25,9 @@ enum render_method {
 	RENDER_TEXTURED_WIRE
 };
 
+#ifdef __EMSCRIPTEN__
 EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void *rawState);
+#endif
 
 bool initialize_window(void);
 void destroy_window(void);

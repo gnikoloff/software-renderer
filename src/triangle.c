@@ -284,24 +284,15 @@ void draw_texel(
 	interpolated_v /= interpolated_reciprocal_w;
 	interpolated_u /= interpolated_reciprocal_w;
 
-	// Get the mesh texture width and heigth
-	int texture_width = upng_get_width(texture);
-	int texture_height = upng_get_height(texture);
-
-	// Map the UV coordinates from (0,0 -> 1, 1) to full texture size (0,0 -> texture_width,texture_height)
-	int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
-	int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
-
 	// Adjust 1/w so the pixel that are closer to the camera have smaller values
 	interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
 	// Only draw the pixel if the depth value is less than the one previously stored in the z-buffer
 	if (interpolated_reciprocal_w < get_zbuffer_at(x, y)) {
 		// Get a pointer to the buffer of texture colors
-		uint32_t* texture_buffer = (uint32_t*)upng_get_buffer(texture);
 
 		// Draw a pixel with the correct texture
-		draw_pixel(x, y, texture_buffer[tex_y * texture_width + tex_x]);
+		draw_pixel(x, y, sample_texture(texture, interpolated_u, interpolated_v));
 		
 		// Update the z-buffer value with the 1/w of this current buffer
 		update_zbuffer_at(x, y, interpolated_reciprocal_w);
