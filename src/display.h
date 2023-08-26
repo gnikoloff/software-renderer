@@ -1,6 +1,9 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#ifdef __EMSCRIPTEN__
+	#include "emscripten/html5.h"
+#endif
 #include <stdbool.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
@@ -21,6 +24,8 @@ enum render_method {
 	RENDER_TEXTURED,
 	RENDER_TEXTURED_WIRE
 };
+
+EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void *rawState);
 
 bool initialize_window(void);
 void destroy_window(void);

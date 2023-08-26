@@ -71,20 +71,48 @@ void update_zbuffer_at(int x, int y, float value) {
 	z_buffer[y * window_width + x] = value;
 }
 
+EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void *rawState) {
+	printf("fired\n");
+	double fullscreen_width;
+	double fullscreen_height;
+	emscripten_get_element_css_size("canvas", &fullscreen_width, &fullscreen_height);
+	emscripten_set_canvas_element_size("canvas", 100, 100);
+	return 1;
+}
+
 bool initialize_window(void) {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+	int sdl_success;
+	#ifdef __EMSCRIPTEN__
+		sdl_success = SDL_Init(SDL_INIT_VIDEO);
+	#else
+		sdl_success = SDL_Init(SDL_INIT_EVERYTHING);
+	#endif
+
+	if (sdl_success != 0) {
 		fprintf(stderr, "Error initializing SDL.\n");
 		return false;
 	}
 
-	SDL_DisplayMode display_mode;
-	SDL_GetCurrentDisplayMode(0, &display_mode);
 
-	int fullscreen_width = display_mode.w;
-	int fullscreen_height = display_mode.h;
+	double fullscreen_width;
+	double fullscreen_height;
 
-	window_width = 500;
-	window_height = 300;
+	#ifdef __EMSCRIPTEN__
+		emscripten_get_element_css_size("canvas", &fullscreen_width, &fullscreen_height);
+		emscripten_set_canvas_element_size("canvas", (int)fullscreen_width, (int)fullscreen_height);
+		EMSCRIPTEN_RESULT is_set_callback = emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, true, emsc_window_size_changed);
+		if (is_set_callback != EMSCRIPTEN_RESULT_SUCCESS) {
+			printf("Unable to set resize callback!\n");
+		}
+	#else
+		SDL_DisplayMode display_mode;
+		SDL_GetCurrentDisplayMode(0, &display_mode);
+		fullscreen_width = display_mode.w;
+		fullscreen_height = display_mode.h;
+	#endif
+
+	window_width = (int)fullscreen_width;
+	window_height = (int)fullscreen_height;
 	
 	window = SDL_CreateWindow(
 		NULL,

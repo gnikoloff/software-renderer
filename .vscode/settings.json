@@ -9,6 +9,13 @@
 		"stdint.h": "c",
 		"__node_handle": "c",
 		"stdio.h": "c",
-		"string.h": "c"
+		"string.h": "c",
+		"upng.h": "c",
+		"limits": "c",
+		"ratio": "c",
+		"chrono": "c",
+		"algorithm": "c",
+		"ios": "c",
+		"swap.h": "c"
 	}
 }

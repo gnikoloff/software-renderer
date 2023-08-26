@@ -7,6 +7,7 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 #include "upng.h"
+#include "utils.h"
 #include "array.h"
 #include "display.h"
 #include "vector.h"
@@ -17,6 +18,7 @@
 #include "light.h"
 #include "mesh.h"
 #include "clipping.h"
+#include "geometry.h"
 
 #define MAX_TRIANGLES_PER_MESH 10000
 triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
@@ -26,19 +28,27 @@ bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
 
-camera_t* camera = NULL;
-
 void setup(void) {
 	set_render_method(RENDER_WIRE);
 	set_cull_method(CULL_BACKFACE);
 
-	load_mesh(
-		"./assets/crab.obj",
-		"./assets/crab.png",
-		vec3_new(1, 1, 1),
-		vec3_new(0, 0, 0),
-		vec3_new(0, 0, 0)
-	);
+	// load_mesh_png_data(torus, "./assets/cube.png");
+	// load_mesh_png_data(sphere, "./assets/cube.png");
+
+	// mesh_t* plane = make_plane(5, 5, 5, 5);
+	load_mesh_png_data(sphere, "./assets/uv-map.png");
+	load_mesh_png_data(box, "./assets/uv-map.png");
+	load_mesh_png_data(ring, "./assets/uv-map.png");
+	load_mesh_png_data(plane, "./assets/uv-map.png");
+	load_mesh_png_data(torus, "./assets/uv-map.png");
+
+	// load_mesh(
+	// 	"./assets/crab.obj",
+	// 	"./assets/crab.png",
+	// 	vec3_new(1, 1, 1),
+	// 	vec3_new(0, 0, 0),
+	// 	vec3_new(0, 0, 0)
+	// );
 
 	// load_mesh(
 	// 	"./assets/crab.obj",
@@ -82,7 +92,6 @@ void process_input(void) {
 			break;
 		case SDL_MOUSEWHEEL:
 			camera->distance += -event.wheel.preciseY * 0.01 * delta_time;
-			printf("%f\n", event.wheel.preciseY);
 			update_camera_on_drag(camera, 0, 0);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
@@ -179,6 +188,26 @@ void update(void) {
 	delta_time = (SDL_GetTicks() - previous_frame_time);
 	previous_frame_time = SDL_GetTicks();
 
+	sphere->rotation.x += delta_time * 0.0001;
+	sphere->rotation.y += delta_time * 0.0001;
+	sphere->rotation.z += delta_time * 0.0001;
+	
+	box->rotation.x += delta_time * 0.0001;
+	box->rotation.y += delta_time * 0.0001;
+	box->rotation.z += delta_time * 0.0001;
+	
+	ring->rotation.x += delta_time * 0.0001;
+	ring->rotation.y += delta_time * 0.0001;
+	ring->rotation.z += delta_time * 0.0001;
+	
+	plane->rotation.x += delta_time * 0.0001;
+	plane->rotation.y += delta_time * 0.0001;
+	plane->rotation.z += delta_time * 0.0001;
+
+	torus->rotation.x += delta_time * 0.0001;
+	torus->rotation.y += delta_time * 0.0001;
+	torus->rotation.z += delta_time * 0.0001;
+
 	num_triangles_to_render = 0;
 
 	// Loop all the meshes of our scene
@@ -203,10 +232,8 @@ void update(void) {
 
 			for (int j = 0; j < 3; j++) {
 				vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
-				// Save transformed vertex in the array of transformed vertices
 				transformed_vertices[j] = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
 				transformed_vertices[j] = mat4_mul_vec4(camera->view_matrix, transformed_vertices[j]);
-				// transformed_vertices[j] = transformed_vertex;
 			}
 
 			// Second we perform backface culling and disregard backfacing triangles
@@ -285,16 +312,15 @@ void update(void) {
 					// Translate the projected points to the middle of the screen
 					projected_points[j].x += half_window_width;
 					projected_points[j].y += half_window_height;
-
 				}
 
 				// Calculate the shade intensity based on how aligned the face normal is with the light direction
-				// float light_intensity_factor = -vec3_dot(&vector_normal, get_light_direction());
+				float light_intensity_factor = -vec3_dot(vector_normal, get_light_direction());
 
 				// Calculate the triangle color based on the light angle
 				uint32_t triangle_color = face.color;
 
-				// triangle_color = light_apply_intensity(triangle_color, light_intensity_factor);
+				triangle_color = light_apply_intensity(triangle_color, light_intensity_factor);
 
 				triangle_t triangle_to_render = {
 					.points = {
@@ -355,7 +381,8 @@ void render(void) {
 
 		if (should_render_vertex()) {
 			for (int j = 0; j < 3; j++) {
-				draw_rect(triangle.points[j].x, triangle.points[j].y, 10, 10, 0xFFFF0000);
+				int size = 10;
+				draw_rect(triangle.points[j].x - size / 2, triangle.points[j].y - size / 2, size, size, 0xFFFF0000);
 			}
 		}
 	}

@@ -1,2 +1,4 @@
 renderer
+native-renderer
 .vscode
+.DS_Store
