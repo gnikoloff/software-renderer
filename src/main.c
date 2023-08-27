@@ -77,7 +77,6 @@ void update(void) {
 		SDL_Delay(time_to_wait);
 	}
 
-	// Get a delta time factor converted to seconds to be used to update our game logic
 	delta_time = (SDL_GetTicks() - previous_frame_time);
 	previous_frame_time = SDL_GetTicks();
 
@@ -85,9 +84,9 @@ void update(void) {
 }
 
 void render(void) {
-	clear_color_buffer(0xFF000000);
-	clear_z_buffer();
-	geometry_example_render(delta_time);
+	clear_color(0xFF000000);
+	clear_depth();
+	geometry_example_render(delta_time, get_screen_depth_buffer());
 	render_color_buffer();
 }
 

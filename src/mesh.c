@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 #include "mesh.h"
 #include "array.h"
 #include "geometry.h"
@@ -250,6 +251,7 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 			face.a_uv = texcoords[uv_indices[0] - 1];
 			face.b_uv = texcoords[uv_indices[1] - 1];
 			face.c_uv = texcoords[uv_indices[2] - 1];
+			face.color = MESH_DEBUG_COLOR;
 
 			// printf("%i %i %i\n", face.a, face.b, face.c);
 

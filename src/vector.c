@@ -1,6 +1,25 @@
 #include <math.h>
 #include "vector.h"
 
+static const float cEpslion = 1e-6f;
+
+// https://en.wikipedia.org/wiki/Fast_inverse_square_root
+float Q_rsqrt(float number) {
+	long i;
+	float x2, y;
+	const float threehalfs = 1.5F;
+
+	x2 = number * 0.5F;
+	y  = number;
+	i  = * ( long * ) &y;                       // evil floating point bit level hacking
+	i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
+	y  = * ( float * ) &i;
+	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+	// y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+	return y;
+}
+
 inline vec2_t vec2_new(float x, float y) {
 	vec2_t result = { x, y };
 	return result;
@@ -52,9 +71,13 @@ inline float vec2_dot(vec2_t a, vec2_t b) {
 }
 
 inline void vec2_normalize(vec2_t* v) {
-	float length = sqrt(v->x * v->x + v->y * v->y);
-	v->x /= length;
-	v->y /= length;
+	float len = vec2_length(*v);
+	// float inv = cEpslion;
+	// if (abs(len) > cEpslion) {
+	// 	inv = 1.0f / len;
+	// }
+	v->x /= len;
+	v->y /= len;
 }
 
 inline vec3_t vec3_new(float x, float y, float z) {
@@ -127,10 +150,14 @@ inline float vec3_dot(vec3_t a, vec3_t b) {
 }
 
 inline void vec3_normalize(vec3_t* v) {
-	float length = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-	v->x /= length;
-	v->y /= length;
-	v->z /= length;
+	float len = vec3_length(*v);
+	// float inv = cEpslion;
+	// if (abs(len) > cEpslion) {
+	// 	inv = 1.0f / len;
+	// }
+	v->x /= len;
+	v->y /= len;
+	v->z /= len;
 }
 
 inline vec3_t vec3_rotate_x(vec3_t v, float angle) {

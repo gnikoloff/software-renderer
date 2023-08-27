@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define MESH_DEBUG_COLOR 0xff0000ff
+#define LINE_DEBUG_COLOR 0xffff0000
+
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define CLAMP(min, max, v) MIN(max, MAX(min, v))

@@ -1,4 +1,4 @@
-// Methods ported from three.js
+// ported from three.js
 // https://github.com/mrdoob/three.js/tree/master/src/geometries
 
 #include <stdlib.h>
@@ -57,7 +57,7 @@ void make_plane_geometry(
 				.a_uv = texcoords[a],
 				.b_uv = texcoords[b],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_a);
 
@@ -68,7 +68,7 @@ void make_plane_geometry(
 				.a_uv = texcoords[b],
 				.b_uv = texcoords[c],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_b);
 		}
@@ -144,7 +144,7 @@ void make_sphere_geometry(
 				face.a_uv = texcoords[a];
 				face.b_uv = texcoords[b];
 				face.c_uv = texcoords[d];
-				face.color = 0xff0000FF;
+				face.color = MESH_DEBUG_COLOR;
 				array_push(mesh->faces, face);
 			}
 
@@ -155,7 +155,7 @@ void make_sphere_geometry(
 				face.a_uv = texcoords[b];
 				face.b_uv = texcoords[c];
 				face.c_uv = texcoords[d];
-				face.color = 0xff0000ff;
+				face.color = MESH_DEBUG_COLOR;
 				array_push(mesh->faces, face);
 			}
 		}
@@ -247,7 +247,7 @@ void build_plane(
 				.a_uv = texcoords[a],
 				.b_uv = texcoords[b],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_a);
 
@@ -258,7 +258,7 @@ void build_plane(
 				.a_uv = texcoords[b],
 				.b_uv = texcoords[c],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_b);
 
@@ -343,7 +343,7 @@ void make_ring_geometry(
 				.a_uv = texcoords[a],
 				.b_uv = texcoords[b],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_a);
 
@@ -354,7 +354,7 @@ void make_ring_geometry(
 				.a_uv = texcoords[b],
 				.b_uv = texcoords[c],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_b);
 		}
@@ -406,7 +406,7 @@ void make_torus_geometry(
 				.a_uv = texcoords[a],
 				.b_uv = texcoords[b],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_a);
 
@@ -417,7 +417,7 @@ void make_torus_geometry(
 				.a_uv = texcoords[b],
 				.b_uv = texcoords[c],
 				.c_uv = texcoords[d],
-				.color = 0xff0000ff
+				.color = MESH_DEBUG_COLOR
 			};
 			array_push(mesh->faces, face_b);
 		}

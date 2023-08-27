@@ -9,7 +9,12 @@
 static triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
 static int num_triangles_to_render = 0;
 
-void render_mesh(mesh_t* mesh, camera_t* camera, void (*render_callback)(triangle_t*)) {
+void render_mesh(
+	mesh_t* mesh,
+	camera_t* camera,
+	depth_framebuffer* z_buffer,
+	void (*render_callback)(triangle_t*, depth_framebuffer*)
+) {
 	mesh_update_world_matrix(mesh);
 	int num_faces = array_length(mesh->faces);
 
@@ -29,7 +34,6 @@ void render_mesh(mesh_t* mesh, camera_t* camera, void (*render_callback)(triangl
 			transformed_vertices[j] = mat4_mul_vec4(camera->view_matrix, transformed_vertices[j]);
 		}
 
-		// Second we perform backface culling and disregard backfacing triangles
 		vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
 		vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]); /*  / \  */
 		vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]); /* C---B */
@@ -54,7 +58,7 @@ void render_mesh(mesh_t* mesh, camera_t* camera, void (*render_callback)(triangl
 
 		if (is_cull_backface()) {
 			if (dot_normal_camera < 0) {
-				continue;
+				// continue;
 			}
 		}
 
@@ -87,8 +91,8 @@ void render_mesh(mesh_t* mesh, camera_t* camera, void (*render_callback)(triangl
 				// Multiply point with projection matrix and perspective divide!
 				projected_points[j] = mat4_mul_vec4_project(camera->projection_matrix, triangle_after_clipping.points[j]);
 
-				float half_window_width = get_window_width() / 2.0;
-				float half_window_height = get_window_height() / 2.0;
+				float half_window_width = get_viewport_width() / 2.0;
+				float half_window_height = get_viewport_height() / 2.0;
 
 				// AT THIS POINT projected_point[j] is in NDC!!!!
 
@@ -134,10 +138,10 @@ void render_mesh(mesh_t* mesh, camera_t* camera, void (*render_callback)(triangl
 				triangles_to_render[num_triangles_to_render++] = triangle_to_render;
 			}
 		}
-	}	
+	}
 
 	for (int i = 0; i < num_triangles_to_render; i++) {
 		triangle_t triangle = triangles_to_render[i];
-		render_callback(&triangle);		
+		render_callback(&triangle, z_buffer);		
 	}
 }

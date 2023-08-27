@@ -24,10 +24,9 @@ static mesh_t* efa = NULL;
 
 void geometry_example_setup(void) {
 	set_render_method(RENDER_TEXTURED);
-	set_cull_method(CULL_NONE);
 
-	float aspectx = (float)get_window_width() / (float)get_window_height();
-	float aspecty = (float)get_window_height() / (float)get_window_width();
+	float aspectx = (float)get_viewport_width() / (float)get_viewport_height();
+	float aspecty = (float)get_viewport_height() / (float)get_viewport_width();
 	float fovy = 3.141592 / 3.0;
 	float fovx = atan(tan(fovy / 2) * aspectx) * 2;
 	float z_near = 1.0;
@@ -37,10 +36,12 @@ void geometry_example_setup(void) {
 	vec3_t cam_target = { .x = 0, .y = 0, .z = 0 };
 	camera = make_perspective_camera(fovy, aspecty, z_near, z_far, cam_position, cam_target);
 	
+	
 	init_frustum_planes(fovx, fovy, z_near, z_far);
 
 	plane = make_plane(3, 3, 3, 3);
 	load_mesh_png_data(plane, "./assets/debug.png");
+	plane->rotation.x = M_PI / 2;
 	plane->translation.x = 2;
 	plane->translation.z = 3;
 
@@ -55,7 +56,8 @@ void geometry_example_setup(void) {
 	box->translation.z = 0;
 
 	ring = make_ring(0.5, 1, 32, 10, 0, M_PI * 2);
-	load_mesh_png_data(ring, "./assets/Debug.png");
+	ring->rotation.x = M_PI / 2;
+	load_mesh_png_data(ring, "./assets/debug.png");
 	ring->translation.x = -2;
 	ring->translation.z = 0;
 
@@ -98,23 +100,22 @@ void geometry_example_update(int delta_time) {
 	box->rotation.y += delta_time * delta_multiplier;
 	box->rotation.z += delta_time * delta_multiplier;
 
-	plane->rotation.x += delta_time * delta_multiplier;
+	// plane->rotation.x += delta_time * delta_multiplier;
 	sphere->rotation.y += delta_time * delta_multiplier;
 	box->rotation.z -= delta_time * delta_multiplier;
-	ring->rotation.x += delta_time * delta_multiplier;
-	ring->rotation.y -= delta_time * delta_multiplier;
 	torus->rotation.y += delta_time * delta_multiplier;
 	torus->rotation.z += delta_time * delta_multiplier;
 	efa->rotation.y += delta_time * delta_multiplier;
 }
 
-void render_triangle(triangle_t* triangle) {
+void render_triangle(triangle_t* triangle, depth_framebuffer* z_buffer) {
 	if (should_render_filled_triangles()) {
 		draw_filled_triangle(
 			triangle->points[0].x, triangle->points[0].y, triangle->points[0].z, triangle->points[0].w,
 			triangle->points[1].x, triangle->points[1].y, triangle->points[1].z, triangle->points[1].w,
 			triangle->points[2].x, triangle->points[2].y, triangle->points[2].z, triangle->points[2].w,
-			triangle->color
+			triangle->color,
+			z_buffer
 		);
 	}
 
@@ -124,14 +125,15 @@ void render_triangle(triangle_t* triangle) {
 				triangle->points[0].x, triangle->points[0].y,
 				triangle->points[1].x, triangle->points[1].y,
 				triangle->points[2].x, triangle->points[2].y,
-				0xFFFF0000
+				LINE_DEBUG_COLOR
 			);
 		} else {
 			draw_textured_triangle(
 				triangle->points[0].x, triangle->points[0].y, triangle->points[0].z, triangle->points[0].w, triangle->tex_coords[0].u, triangle->tex_coords[0].v,
 				triangle->points[1].x, triangle->points[1].y, triangle->points[1].z, triangle->points[1].w, triangle->tex_coords[1].u, triangle->tex_coords[1].v,
 				triangle->points[2].x, triangle->points[2].y, triangle->points[2].z, triangle->points[2].w, triangle->tex_coords[2].u, triangle->tex_coords[2].v,
-				triangle->texture
+				triangle->texture,
+				z_buffer
 			);
 		}
 	}
@@ -141,22 +143,22 @@ void render_triangle(triangle_t* triangle) {
 			triangle->points[0].x, triangle->points[0].y,
 			triangle->points[1].x, triangle->points[1].y,
 			triangle->points[2].x, triangle->points[2].y,
-			0xFFFF0000
+			LINE_DEBUG_COLOR
 		);
 	}
 
 	if (should_render_vertex()) {
 		for (int j = 0; j < 3; j++) {
 			int size = 10;
-			draw_rect(triangle->points[j].x - size / 2, triangle->points[j].y - size / 2, size, size, 0xFFFF0000);
+			draw_rect(triangle->points[j].x - size / 2, triangle->points[j].y - size / 2, size, size, LINE_DEBUG_COLOR);
 		}
 	}
 }
 
-void geometry_example_render(int delta_time) {
+void geometry_example_render(int delta_time, depth_framebuffer* z_buffer) {
 	for (int mesh_index = 0; mesh_index < get_meshes_count(); mesh_index++) {
 		mesh_t* mesh = get_mesh(mesh_index);
-		render_mesh(mesh, camera, render_triangle);
+		render_mesh(mesh, camera, z_buffer, render_triangle);
 	}
 }
 
