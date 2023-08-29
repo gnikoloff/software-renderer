@@ -30,6 +30,7 @@ uint32_t u8_to_u32(const uint8_t* bytes) {
   return u32;
 }
 
+
 // We pass an output array in the arguments because we can not return arrays
 uint8_t* u32_to_u8(const uint32_t u32, uint8_t* u8) {
   // To extract each byte, we can mask them using bitwise AND (&)
