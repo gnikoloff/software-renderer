@@ -59,14 +59,24 @@ void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int* num
 		int index0 = 0;
 		int index1 = i + 1;
 		int index2 = i + 2;
-		
-		triangles[i].points[0] = vec4_from_vec3(polygon->vertices[index0]);
-		triangles[i].points[1] = vec4_from_vec3(polygon->vertices[index1]);
-		triangles[i].points[2] = vec4_from_vec3(polygon->vertices[index2]);
 
-		triangles[i].tex_coords[0] = polygon->texcoords[index0];
-		triangles[i].tex_coords[1] = polygon->texcoords[index1];
-		triangles[i].tex_coords[2] = polygon->texcoords[index2];
+		vertex_t vertex_a = {
+			.position = vec4_from_vec3(polygon->vertices[index0]),
+			.uv = polygon->texcoords[index0],
+		};
+		vertex_t vertex_b = {
+			.position = vec4_from_vec3(polygon->vertices[index1]),
+			.uv = polygon->texcoords[index1],
+		};
+		vertex_t vertex_c = {
+			.position = vec4_from_vec3(polygon->vertices[index2]),
+			.uv = polygon->texcoords[index2],
+		};
+
+		triangles[i].vertices[0] = vertex_a;
+		triangles[i].vertices[1] = vertex_b;
+		triangles[i].vertices[2] = vertex_c;
+		
 	}
 	*num_triangles = polygon->num_vertices - 2;
 }

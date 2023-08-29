@@ -62,12 +62,23 @@ void clear_depth_buffer(depth_framebuffer* framebuffer) {
 	}
 }
 
+depth_framebuffer* get_depth_buffer(int idx) {
+	return &depth_framebuffers[idx];
+}
+
 float get_depth_buffer_at(depth_framebuffer* framebuffer, int x, int y) {
 	if (x < 0 || x >= framebuffer->width || y < 0 || y >= framebuffer->height) {
 		return 1.0;
 	}
 	float depth = framebuffer->buffer[y * framebuffer->width + x];
 	return depth;
+}
+
+float get_depth_buffer_at_idx(depth_framebuffer* framebuffer, int idx) {
+	if (idx < 0 || idx >= framebuffer->width * framebuffer->height) {
+		return 1.0;
+	}
+	return framebuffer->buffer[idx];
 }
 
 void update_depth_buffer_at(depth_framebuffer* framebuffer, int x, int y, float value) {

@@ -24,10 +24,34 @@ typedef struct {
 
 	mat4_t view_matrix;
 	mat4_t projection_matrix;
-	mat4_t view_projection_matrix;
-} camera_t;
+	mat4_t inverse_view_matrix;
+	mat4_t inverse_projection_matrix;
+} perspective_camera_t;
 
-camera_t* make_perspective_camera(
+typedef struct {
+	vec3_t position;
+	vec3_t target;
+	vec3_t rotation;
+
+	float left;
+	float right;
+	float top;
+	float bottom;
+	float z_near;
+	float z_far;
+
+	mat4_t view_matrix;
+	mat4_t projection_matrix;
+	mat4_t inverse_view_matrix;
+	mat4_t inverse_projection_matrix;
+} orthographic_camera_t;
+
+enum camera_type {
+	PERSPECTIVE_CAMERA,
+	ORTHOGRAPHIC_CAMERA
+};
+
+perspective_camera_t* make_perspective_camera(
 	float fov,
 	float aspect,
 	float z_near,
@@ -35,8 +59,16 @@ camera_t* make_perspective_camera(
 	vec3_t position,
 	vec3_t target
 );
-void update_camera_projection_matrix(camera_t *camera);
-void update_camera_view_matrix(camera_t *camera);
-void update_camera_on_drag(camera_t *camera, int mouse_x, int mouse_y);
+orthographic_camera_t* make_orthographic_camera(
+	float left,
+	float right,
+	float top,
+	float bottom,
+	float z_near,
+	float z_far,
+	vec3_t position,
+	vec3_t target
+);
+void update_camera_on_drag(perspective_camera_t* camera, int mouse_x, int mouse_y);
 
 #endif

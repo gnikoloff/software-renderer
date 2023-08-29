@@ -33,6 +33,9 @@ EM_BOOL emsc_window_size_changed(int eventType, const EmscriptenUiEvent *e, void
 bool initialize_window(void);
 void destroy_window(void);
 
+color_framebuffer* get_screen_color_buffer(void);
+depth_framebuffer* get_screen_depth_buffer(void);
+
 int get_viewport_width(void);
 int get_viewport_height(void);
 
@@ -45,12 +48,10 @@ bool should_render_filled_triangles(void);
 bool should_render_textured_triangles(void);
 bool should_render_wireframe(void);
 bool should_render_vertex(void);
-void draw_pixel(int x, int y, uint32_t color);
 void draw_rect(int start_x, int start_y, int width, int height, uint32_t color);
-void draw_line(int x0, int y0, int x1, int y1, uint32_t color);
+void draw_line(int x0, int y0, int x1, int y1, uint32_t color, color_framebuffer* color_buffer);
 void render_color_buffer(void);
 void clear_color(uint32_t color);
 void clear_depth();
-depth_framebuffer* get_screen_depth_buffer(void);
 
 #endif

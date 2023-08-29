@@ -17,6 +17,14 @@ static depth_framebuffer* z_buffer = NULL;
 static int render_method = 0;
 static int cull_method = 0;
 
+color_framebuffer* get_screen_color_buffer(void) {
+	return color_buffer;
+}
+
+depth_framebuffer* get_screen_depth_buffer(void) {
+	return z_buffer;
+}
+
 int get_viewport_width(void) {
 	return window_width;
 }
@@ -55,10 +63,6 @@ bool should_render_wireframe(void) {
 
 bool should_render_vertex(void) {
 	return render_method == RENDER_WIRE_VERTEX;
-}
-
-depth_framebuffer* get_screen_depth_buffer(void) {
-	return z_buffer;
 }
 
 float get_depth_at(int x, int y) {
@@ -161,21 +165,22 @@ void clear_depth() {
 	clear_depth_buffer(z_buffer);
 }
 
-inline void draw_pixel(int x, int y, uint32_t color) {
-	update_color_buffer_at(color_buffer, x, y, color);
-}
-
 inline void draw_rect(int x, int y, int width, int height, uint32_t color) {
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			int current_x = x + i;
 			int current_y = y + j;
-			draw_pixel(current_x, current_y, color);
+			update_color_buffer_at(color_buffer, current_x, current_y, color);
 		}
 	}
 }
 
-inline void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
+inline void draw_line(
+	int x0, int y0,
+	int x1, int y1,
+	uint32_t color,
+	color_framebuffer* color_buffer
+) {
 	int delta_x = x1 - x0;
 	int delta_y = y1 - y0;
 
@@ -188,7 +193,7 @@ inline void draw_line(int x0, int y0, int x1, int y1, uint32_t color) {
 	float current_y = y0;
 
 	for (int i = 0; i <= longest_side_length; i++) {
-		draw_pixel(round(current_x), round(current_y), color);
+		update_color_buffer_at(color_buffer, (current_x), round(current_y), color);
 		current_x += x_inc;
 		current_y += y_inc;
 	}

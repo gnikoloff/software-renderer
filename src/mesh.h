@@ -22,6 +22,8 @@ typedef struct {
 	mat4_t world_matrix;
 	
 	quat_t quaternion;
+
+	int idx;
 } mesh_t;
 
 mesh_t* load_mesh(

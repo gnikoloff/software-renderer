@@ -25,7 +25,9 @@ void destroy_color_buffer(color_framebuffer* framebuffer);
 
 depth_framebuffer* make_depth_buffer(int width, int height);
 void clear_depth_buffer(depth_framebuffer* framebuffer);
+depth_framebuffer* get_depth_buffer(int idx);
 float get_depth_buffer_at(depth_framebuffer* framebuffer, int x, int y);
+float get_depth_buffer_at_idx(depth_framebuffer* framebuffer, int idx);
 void update_depth_buffer_at(depth_framebuffer* framebuffer, int x, int y, float value);
 void destroy_depth_buffer(depth_framebuffer* framebuffer);
 

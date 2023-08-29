@@ -15,7 +15,8 @@
 #include "clipping.h"
 #include "geometry.h"
 
-#include "examples/geometry-demo.h"
+// #include "examples/geometry-demo.h"
+#include "examples/shadow-map-demo.h"
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -24,7 +25,8 @@ int delta_time = 0;
 void setup(void) {
 	set_render_method(RENDER_WIRE);
 	set_cull_method(CULL_BACKFACE);
-	geometry_example_setup();
+	// geometry_example_setup();
+	shadow_map_example_setup();
 }
 
 void process_input(void) {
@@ -67,7 +69,8 @@ void process_input(void) {
 			return;
 		}
 
-		geometry_example_process_input(&event, delta_time);
+		shadow_map_example_process_input(&event, delta_time);
+		// geometry_example_process_input(&event, delta_time);
 	}
 }
 
@@ -80,18 +83,21 @@ void update(void) {
 	delta_time = (SDL_GetTicks() - previous_frame_time);
 	previous_frame_time = SDL_GetTicks();
 
-	geometry_example_update(delta_time);
+	shadow_map_example_update(delta_time);
+	// geometry_example_update(delta_time);
 }
 
 void render(void) {
 	clear_color(0xFF000000);
 	clear_depth();
-	geometry_example_render(delta_time, get_screen_depth_buffer());
+	shadow_map_example_render(delta_time);
+	// geometry_example_render(delta_time);
 	render_color_buffer();
 }
 
 void free_resources(void) {
-	geometry_example_free_resources();
+	shadow_map_example_free_resources();
+	// geometry_example_free_resources();
 	destroy_window();
 }
 

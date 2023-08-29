@@ -24,6 +24,7 @@ mesh_t* make_plane(
 
 	make_plane_geometry(mesh, width, height, width_segments, height_segments);
 	init_mesh_common_properties(mesh);
+	mesh->idx = mesh_count;
 
 	mesh_count++;
 
