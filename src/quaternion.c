@@ -120,3 +120,9 @@ inline quat_t quat_rotate_y(quat_t q, float a) {
 	return result;
 }
 
+inline void quat_identity(quat_t* q) {
+	q->x = 0;
+	q->y = 0;
+	q->z = 0;
+	q->w = 1.0;
+}

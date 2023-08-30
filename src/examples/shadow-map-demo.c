@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "math.h"
+#include <time.h> 
 #include <SDL2/SDL.h>
 #include "../utils.h"
 #include "../array.h"
@@ -13,13 +14,22 @@
 #include "../light.h"
 #include "../pipeline.h"
 
-#define SHADOW_DEPTH_BUFFER_SIZE 256
+#define SHADOW_DEPTH_BUFFER_SIZE 512
+#define SHADOW_DEPTH_BUFFER_HALF_SIZE 256
 
 static perspective_camera_t* persp_camera = NULL;
 static orthographic_camera_t* depth_camera = NULL;
 static depth_framebuffer* shadow_depth_buffer = NULL;
 static mesh_t* efa = NULL;
 static mesh_t* plane = NULL;
+static bool is_plane_render = false;
+static time_t elapsed_time;
+static time_t next_time;
+
+static vec3_t jet_rotation_target = { .x = 0, .y = 0, .z = 0 };
+static vec3_t jet_position_target = { .x = 0, .y = 2, .z = 0 };
+static vec3_t jet_position_dt_mult = { .x = 0.001, .y = 0.001, .z = 0.001 };
+static vec3_t jet_position_dt_mult_target = { .x = 0.001, .y = 0.001, .z = 0.001 };
 
 void shadow_map_example_setup(void) {
 	set_render_method(RENDER_TEXTURED);
@@ -48,13 +58,13 @@ void shadow_map_example_setup(void) {
 		persp_cam_target
 	);
 
-	vec3_t ortho_cam_position = { .x = 0, .y = 10, .z = 10.1 };
-	vec3_t ortho_cam_target = { .x = 0, .y = 0, .z = 0 };
+	vec3_t ortho_cam_position = { .x = 0, .y = 10, .z = 1.1 };
+	vec3_t ortho_cam_target = { .x = 0, .y = 1, .z = 0 };
 	depth_camera = make_orthographic_camera(
 		-0.5,
 		 0.5,
 		 0.5,
-		-1.5,
+		-0.5,
 		z_near,
 		z_far,
 		ortho_cam_position,
@@ -72,13 +82,16 @@ void shadow_map_example_setup(void) {
 		vec3_new(0, 0, 0),
 		vec3_new(0, 0, 0)
 	);
-	efa->scale.x = 1.0;
-	efa->scale.y = 1.0;
-	efa->scale.z = 1.0;
+	efa->scale.x = 0.5;
+	efa->scale.y = 0.5;
+	efa->scale.z = 0.5;
 	efa->translation.y = 2.0;
 
-	plane = make_plane(5, 5, 1, 1);
+	plane = make_plane(5, 5, 10, 10);
 	plane->rotation.x = M_PI / 2;
+
+	elapsed_time = time(NULL);
+	next_time = elapsed_time + (uint32_t)2;
 }
 
 void shadow_map_example_process_input(SDL_Event* event, int delta_time) {
@@ -95,12 +108,70 @@ void shadow_map_example_process_input(SDL_Event* event, int delta_time) {
 	}
 }
 
-void shadow_map_example_update(int delta_time) {
-	float delta_multiplier = 0.00075;
-	efa->rotation.y += delta_time * delta_multiplier;
-	// depth_camera->position.z -= delta_time * 0.001;
-	// static vec3_t up = { 0, 1, 0 };
-	// persp_camera->view_matrix = mat4_look_at(depth_camera->position, depth_camera->target, up);
+void reorient_jet() {
+	// 0 - 4
+	int r = rand() % 6;
+	printf("%i\n", r);
+	if (r == 0) {
+		jet_rotation_target.x += M_PI * 2;
+		jet_position_target.x = 1;
+		jet_position_dt_mult_target.x = 0.003;
+		jet_position_dt_mult_target.y = 0.001;
+	} else if (r == 1) {
+		jet_rotation_target.x -= M_PI * 2;
+		jet_position_target.x = 1.5;
+		jet_position_dt_mult_target.x = 0.001;
+		jet_position_dt_mult_target.y = 0.003;
+	} else if (r == 2) {
+		jet_rotation_target.x += M_PI * 4;
+		jet_position_target.x = -1.5;
+		jet_position_dt_mult_target.x = 0.001;
+		jet_position_dt_mult_target.y = 0.003;
+	} else if (r == 3) {
+		jet_rotation_target.x -= M_PI * 4;
+		jet_position_target.x = -1.5;
+		jet_position_dt_mult_target.x = 0.003;
+		jet_position_dt_mult_target.y = 0.0025;
+	} else if (r == 4) {
+		jet_position_target.x = 1.2;
+	} else if (r == 5) {
+		jet_position_target.x = -0.7;
+	}
+}
+
+void shadow_map_example_update(int delta_time, int elapsed_time) {
+
+	for (int i = 0; i < plane->vertices_count; i++) {
+		vec3_t* vertex = &plane->vertices[i];
+		vertex->z = sin(elapsed_time * 0.002 + vertex->x) * 0.2;
+		printf("%f\n", vertex->y);
+	}
+
+	jet_position_target.z = sin(elapsed_time * 0.001) * 3;
+	jet_position_target.y = cos(elapsed_time * 0.001) * 1 + 2;
+
+	float old_translation_y = efa->translation.y;
+
+	jet_position_dt_mult.x += (jet_position_dt_mult_target.x - jet_position_dt_mult.x) * (delta_time * 0.001);
+	jet_position_dt_mult.y += (jet_position_dt_mult_target.y - jet_position_dt_mult.y) * (delta_time * 0.001);
+	jet_position_dt_mult.z += (jet_position_dt_mult_target.z - jet_position_dt_mult.z) * (delta_time * 0.001);
+
+	efa->translation.x += (jet_position_target.x - efa->translation.x) * (delta_time * jet_position_dt_mult.x);
+	efa->translation.y += (jet_position_target.y - efa->translation.y) * (delta_time * jet_position_dt_mult.y);
+	efa->translation.z += (jet_position_target.z - efa->translation.z) * (delta_time * jet_position_dt_mult.z);
+
+	float y_delta = efa->translation.y - old_translation_y;
+
+	efa->rotation.x += (jet_rotation_target.x - efa->rotation.x) * (delta_time * 0.0015);
+	efa->rotation.y += (jet_rotation_target.y - efa->rotation.y) * (delta_time * 0.0015);
+
+	efa->rotation.z += y_delta * 0.2;
+
+	efa->rotation.z += (jet_rotation_target.z - efa->rotation.z) * (delta_time * 0.0015);
+
+	// efa->translation.y = sin(time * delta_multiplier) * 2 + 3;
+	// efa->translation.z = cos(time * delta_multiplier) * 3;
+	// efa->rotation.x += delta_time * delta_multiplier * 3;
 }
 
 void depth_vertex_shader(
@@ -109,15 +180,14 @@ void depth_vertex_shader(
 	mesh_t* mesh,
 	vertex_t* vertex
 ) {
-	float half_depth_width = SHADOW_DEPTH_BUFFER_SIZE / 2;
-	float half_depth_height = SHADOW_DEPTH_BUFFER_SIZE / 2;
-	vertex->position.x *= half_depth_width;
-	vertex->position.y *= half_depth_height;
+	vertex->position.x *= SHADOW_DEPTH_BUFFER_HALF_SIZE;
+	vertex->position.y *= SHADOW_DEPTH_BUFFER_HALF_SIZE;
 	vertex->position.y *= -1;
 	
-	vertex->position.x += half_depth_width;
-	vertex->position.y += half_depth_height;
+	vertex->position.x += SHADOW_DEPTH_BUFFER_HALF_SIZE;
+	vertex->position.y += SHADOW_DEPTH_BUFFER_HALF_SIZE;
 }
+
 void depth_fragment_shader(
 	int camera_type,
 	void* camera,
@@ -128,11 +198,11 @@ void depth_fragment_shader(
 	float interpolated_y,
 	float interpolated_z
 ) {
-	uint8_t a = round(interpolated_reciprocal_w * 255.0);
-	uint8_t test_color[4] = {1, a, a, a};
-	uint32_t color = u8_to_u32(test_color);
+	// uint8_t a = round((1 - interpolated_reciprocal_w) * 255.0);
+	// uint8_t test_color[4] = {1, a, a, a};
+	// uint32_t color = u8_to_u32(test_color);
 	// update_color_buffer_at(get_screen_color_buffer(), x, y, color);
-	update_depth_buffer_at(shadow_depth_buffer, x, y, interpolated_reciprocal_w);
+	update_depth_buffer_at(shadow_depth_buffer, x, y, 1 - interpolated_reciprocal_w);
 }
 
 void main_vertex_shader(
@@ -143,6 +213,7 @@ void main_vertex_shader(
 ) {
 	float half_viewport_width = get_viewport_width() / 2;
 	float half_viewport_height = get_viewport_height() / 2;
+
 	vertex->position.x *= half_viewport_width;
 	vertex->position.y *= half_viewport_height;
 	vertex->position.y *= -1;
@@ -151,7 +222,6 @@ void main_vertex_shader(
 	vertex->position.y += half_viewport_height;
 }
 
-static int a = 0;
 
 void main_fragment_shader(
 	int camera_type,
@@ -164,33 +234,9 @@ void main_fragment_shader(
 	float interpolated_y,
 	float interpolated_z
 ) {
-	// vec4_t model_pos = vec4_new(model_space_x, model_space_y, model_space_z, 1);
-	// // printf("model_pos %f %f %f\n", model_pos.x, model_pos.y, model_pos.z);
-	
-	
-	// vec3_t model_pos3 = vec3_from_vec4(model_pos);
-	// vec3_normalize(&model_pos3);
+	// float light_intensity_factor = -vec3_dot(vector_normal, get_light_direction());
 
-	// mat4_t inverse_model_matrix = mat4_inverse(mesh->world_matrix);
-
-	vec4_t pos = vec4_new(interpolated_x, interpolated_y, interpolated_z, interpolated_reciprocal_w);
-	mat4_t inverse_vp_matrix = mat4_mul_mat4(depth_camera->projection_matrix, depth_camera->view_matrix);
-	vec4_t shadow_pos = mat4_mul_vec4(inverse_vp_matrix, pos);
-	shadow_pos.x /= shadow_pos.w;
-	shadow_pos.y /= shadow_pos.w;
-	shadow_pos.z /= shadow_pos.w;
-
-	float half_depth_width = SHADOW_DEPTH_BUFFER_SIZE / 2;
-	float half_depth_height = SHADOW_DEPTH_BUFFER_SIZE / 2;
-
-	int shadow_x = shadow_pos.x * SHADOW_DEPTH_BUFFER_SIZE;
-	int shadow_y = shadow_pos.y * SHADOW_DEPTH_BUFFER_SIZE;
-
-	shadow_x += half_depth_width;
-	shadow_y += half_depth_height;
-
-	int idx = shadow_y * SHADOW_DEPTH_BUFFER_SIZE + shadow_x; // index in the shadowbuffer array
-
+	// face.color = light_apply_intensity(face.color, light_intensity_factor);
 	draw_texel(
 		x, y,
 		mesh->texture,
@@ -199,25 +245,38 @@ void main_fragment_shader(
 		get_screen_color_buffer(),
 		get_screen_depth_buffer()
 	);
-	if ((get_depth_buffer_at_idx(shadow_depth_buffer, idx) < (1 - shadow_pos.z))) {
-		update_color_buffer_at(get_screen_color_buffer(), x, y, a % 2 == 0 ? 0xff00ff00 : 0xffff0000);
-	}
-
 	
+	if (is_plane_render) {
+		vec4_t pos = vec4_new(interpolated_x, interpolated_y, interpolated_z, interpolated_reciprocal_w);
+		mat4_t inverse_vp_matrix = mat4_mul_mat4(depth_camera->projection_matrix, depth_camera->view_matrix);
+		vec4_t shadow_pos = mat4_mul_vec4_project(inverse_vp_matrix, pos);
+
+		int shadow_x = shadow_pos.x * SHADOW_DEPTH_BUFFER_HALF_SIZE;
+		int shadow_y = shadow_pos.y * SHADOW_DEPTH_BUFFER_HALF_SIZE;
+		shadow_y *= -1;
+
+		shadow_x += SHADOW_DEPTH_BUFFER_HALF_SIZE;
+		shadow_y += SHADOW_DEPTH_BUFFER_HALF_SIZE;
+
+		int idx = shadow_y * SHADOW_DEPTH_BUFFER_SIZE + shadow_x; // index in the shadowbuffer array
+
+		update_color_buffer_at(get_screen_color_buffer(), x, y, 0xffbbbbbb);
+		if ((get_depth_buffer_at_idx(shadow_depth_buffer, idx) < (1 - shadow_pos.z))) {
+			update_color_buffer_at(get_screen_color_buffer(), x, y, 0xffaaaaaa);
+		}
+	}
 }
 
-void shadow_map_example_render(int delta_time) {
-	// render shadow map
+void shadow_map_example_render(int delta_time, int elapsed_time) {
+	elapsed_time = time(NULL);
+	if (elapsed_time > next_time) {
+		reorient_jet();
+		next_time = time(NULL) + (uint32_t)2;
+	}
 
+	// render shadow map
 	clear_depth_buffer(shadow_depth_buffer);
 
-	pipeline_draw(
-		ORTHOGRAPHIC_CAMERA,
-		depth_camera,
-		plane,
-		depth_vertex_shader,
-		depth_fragment_shader
-	);
 	pipeline_draw(
 		ORTHOGRAPHIC_CAMERA,
 		depth_camera,
@@ -227,6 +286,7 @@ void shadow_map_example_render(int delta_time) {
 	);
 
 	// render main scene
+	is_plane_render = true;
 	pipeline_draw(
 		PERSPECTIVE_CAMERA,
 		persp_camera,
@@ -234,8 +294,8 @@ void shadow_map_example_render(int delta_time) {
 		main_vertex_shader,
 		main_fragment_shader
 	);
-	a++;
 	
+	is_plane_render = false;
 	pipeline_draw(
 		PERSPECTIVE_CAMERA,
 		persp_camera,
@@ -243,57 +303,6 @@ void shadow_map_example_render(int delta_time) {
 		main_vertex_shader,
 		main_fragment_shader
 	);
-	
-	a++;
-	if (a == 2) {
-		a = 0;
-	}
-	// get_triangles_to_render_from_mesh(
-	// 	efa,
-	// 	&depth_camera->view_matrix,
-	// 	&depth_camera->projection_matrix,
-	// 	SHADOW_DEPTH_BUFFER_SIZE,
-	// 	SHADOW_DEPTH_BUFFER_SIZE,
-	// 	false
-	// );
-	// render_triangles(NULL, shadow_depth_buffer, NULL);
-	// get_triangles_to_render_from_mesh(
-	// 	plane,
-	// 	&depth_camera->view_matrix,
-	// 	&depth_camera->projection_matrix,
-	// 	SHADOW_DEPTH_BUFFER_SIZE,
-	// 	SHADOW_DEPTH_BUFFER_SIZE,
-	// 	false
-	// );
-	// render_triangles(NULL, shadow_depth_buffer, NULL);
-
-	// // render main scene
-	// get_triangles_to_render_from_mesh(
-	// 	efa,
-	// 	&persp_camera->view_matrix,
-	// 	&persp_camera->projection_matrix,
-	// 	get_viewport_width(),
-	// 	get_viewport_height(),
-	// 	true
-	// );
-	// render_triangles(
-	// 	get_screen_color_buffer(),
-	// 	get_screen_depth_buffer(),
-	// 	&depth_camera->view_projection_matrix
-	// );
-	// get_triangles_to_render_from_mesh(
-	// 	plane,
-	// 	&persp_camera->view_matrix,
-	// 	&persp_camera->projection_matrix,
-	// 	get_viewport_width(),
-	// 	get_viewport_height(),
-	// 	true
-	// );
-	// render_triangles(
-	// 	get_screen_color_buffer(),
-	// 	get_screen_depth_buffer(),
-	// 	&depth_camera->view_projection_matrix
-	// );
 }
 
 void shadow_map_example_free_resources(void) {

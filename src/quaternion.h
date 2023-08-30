@@ -17,5 +17,6 @@ mat4_t quat_get_rotation_matrix(quat_t q);
 quat_t quat_rotate_x(quat_t q, float a);
 quat_t quat_rotate_z(quat_t q, float a);
 quat_t quat_rotate_y(quat_t q, float a);
+void quat_identity(quat_t* q);
 
 #endif

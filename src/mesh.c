@@ -153,7 +153,7 @@ void mesh_update_world_matrix(mesh_t *mesh) {
 		mesh->translation.y,
 		mesh->translation.z
 	);
-	// mesh->quaternion = quat_from_vec3(mesh->rotation, 0);
+	quat_identity(&mesh->quaternion);
 	mesh->quaternion = quat_rotate_x(mesh->quaternion, mesh->rotation.x);
 	mesh->quaternion = quat_rotate_y(mesh->quaternion, mesh->rotation.y);
 	mesh->quaternion = quat_rotate_z(mesh->quaternion, mesh->rotation.z);
@@ -163,8 +163,6 @@ void mesh_update_world_matrix(mesh_t *mesh) {
 	mesh->world_matrix = mat4_mul_mat4(mesh->scale_matrix, mesh->world_matrix);
 	mesh->world_matrix = mat4_mul_mat4(mesh->rotation_matrix, mesh->world_matrix);
 	mesh->world_matrix = mat4_mul_mat4(mesh->translation_matrix, mesh->world_matrix);
-
-	vec3_reset(&mesh->rotation);
 
 }
 
@@ -215,6 +213,7 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 	char line[255];
 
 	tex2_t* texcoords = NULL;
+	int vertices_count = 0;
 
 	while (fgets(line, 255, file)) {
 		// Vertex information
@@ -222,6 +221,7 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 			vec3_t vertex;
 			sscanf(line, "v %f %f %f", &vertex.x, &vertex.y, &vertex.z);
 			array_push(mesh->vertices, vertex);
+			vertices_count++;
 		}
 
 		// Texture coordinate information
@@ -259,6 +259,8 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 			array_push(mesh->faces, face);
 		}
 	}
+
+	mesh->vertices_count = vertices_count;
 
 	array_free(texcoords);
 }

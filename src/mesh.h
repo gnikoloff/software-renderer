@@ -24,6 +24,7 @@ typedef struct {
 	quat_t quaternion;
 
 	int idx;
+	int vertices_count;
 } mesh_t;
 
 mesh_t* load_mesh(

@@ -4,8 +4,9 @@
 #include "clipping.h"
 #include "display.h"
 #include "utils.h"
+#include "light.h"
 
-static vertex_t varying_vertices[3];
+static vertex_t varying_world_vertices[3];
 
 void pipeline_draw(
 	int camera_type,
@@ -52,14 +53,16 @@ void pipeline_draw(
 
 		for (int j = 0; j < 3; j++) {
 			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
-			transformed_vertices[j] = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
+			vec4_t world_space_vertex = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
+
+			transformed_vertices[j] = world_space_vertex;
+			varying_world_vertices[j].position = world_space_vertex;
 			
 			if (camera_type == PERSPECTIVE_CAMERA) {
 				transformed_vertices[j] = mat4_mul_vec4(persp_camera->view_matrix, transformed_vertices[j]);
 			} else {
 				transformed_vertices[j] = mat4_mul_vec4(ortho_camera->view_matrix, transformed_vertices[j]);
 			}
-			varying_vertices[j].position = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
 		}
 
 		vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
@@ -89,6 +92,9 @@ void pipeline_draw(
 			vec3_from_vec4(transformed_vertices[0]),
 			vec3_from_vec4(transformed_vertices[1]),
 			vec3_from_vec4(transformed_vertices[2]),
+			vec3_from_vec4(varying_world_vertices[0].position),
+			vec3_from_vec4(varying_world_vertices[1].position),
+			vec3_from_vec4(varying_world_vertices[2].position),
 			face.a_uv,
 			face.b_uv,
 			face.c_uv
@@ -145,6 +151,23 @@ void pipeline_draw(
 			float u2 = triangle_to_render.vertices[2].uv.u;
 			float v2 = triangle_to_render.vertices[2].uv.v;
 
+			float model_x0 = triangle_to_render.vertices[0].world_space_position.x;
+			float model_y0 = triangle_to_render.vertices[0].world_space_position.y;
+			float model_z0 = triangle_to_render.vertices[0].world_space_position.z;
+			float model_w0 = triangle_to_render.vertices[0].world_space_position.w;
+
+			float model_x1 = triangle_to_render.vertices[1].world_space_position.x;
+			float model_y1 = triangle_to_render.vertices[1].world_space_position.y;
+			float model_z1 = triangle_to_render.vertices[1].world_space_position.z;
+			float model_w1 = triangle_to_render.vertices[1].world_space_position.w;
+
+			float model_x2 = triangle_to_render.vertices[2].world_space_position.x;
+			float model_y2 = triangle_to_render.vertices[2].world_space_position.y;
+			float model_z2 = triangle_to_render.vertices[2].world_space_position.z;
+			float model_w2 = triangle_to_render.vertices[2].world_space_position.w;
+
+			// printf("%f %f %f %f\n", model_x0, model_y0, model_z0, model_w0);
+
 			if (y0 > y1) {
 				int_swap(&y0, &y1);
 				int_swap(&x0, &x1);
@@ -152,6 +175,11 @@ void pipeline_draw(
 				float_swap(&v0, &v1);
 				float_swap(&z0, &z1);
 				float_swap(&w0, &w1);
+
+				float_swap(&model_x0, &model_x1);
+				float_swap(&model_y0, &model_y1);
+				float_swap(&model_z0, &model_z1);
+				float_swap(&model_w0, &model_w1);
 			}
 			if (y1 > y2) {
 				int_swap(&y1, &y2);
@@ -160,6 +188,11 @@ void pipeline_draw(
 				float_swap(&v1, &v2);
 				float_swap(&z1, &z2);
 				float_swap(&w1, &w2);
+
+				float_swap(&model_x1, &model_x2);
+				float_swap(&model_y1, &model_y2);
+				float_swap(&model_z1, &model_z2);
+				float_swap(&model_w1, &model_w2);
 			}
 			// We need to sort y0 and y1 again because y1 might have changed!
 			if (y0 > y1) {
@@ -169,6 +202,11 @@ void pipeline_draw(
 				float_swap(&v0, &v1);
 				float_swap(&z0, &z1);
 				float_swap(&w0, &w1);
+
+				float_swap(&model_x0, &model_x1);
+				float_swap(&model_y0, &model_y1);
+				float_swap(&model_z0, &model_z1);
+				float_swap(&model_w0, &model_w1);
 			}
 
 			// Flip the V component to account for invertex textures
@@ -221,12 +259,12 @@ void pipeline_draw(
 						interpolated_v /= interpolated_reciprocal_w;
 						interpolated_u /= interpolated_reciprocal_w;
 
-						float interpolated_x = (varying_vertices[0].position.x) * alpha + (varying_vertices[1].position.x) * beta + (varying_vertices[2].position.x) * gamma;
-						float interpolated_y = (varying_vertices[0].position.y) * alpha + (varying_vertices[1].position.y) * beta + (varying_vertices[2].position.y) * gamma;
-						float interpolated_z = (varying_vertices[0].position.z) * alpha + (varying_vertices[1].position.z) * beta + (varying_vertices[2].position.z) * gamma;
-						// interpolated_x /= interpolated_reciprocal_w;
-						// interpolated_y /= interpolated_reciprocal_w;
-						// interpolated_z /= interpolated_reciprocal_w;
+						float interpolated_x = (model_x0 / point_a.w) * alpha + (model_x1 / point_b.w) * beta + (model_x2 / point_c.w) * gamma;
+						float interpolated_y = (model_y0 / point_a.w) * alpha + (model_y1 / point_b.w) * beta + (model_y2 / point_c.w) * gamma;
+						float interpolated_z = (model_z0 / point_a.w) * alpha + (model_z1 / point_b.w) * beta + (model_z2 / point_c.w) * gamma;
+						interpolated_x /= interpolated_reciprocal_w;
+						interpolated_y /= interpolated_reciprocal_w;
+						interpolated_z /= interpolated_reciprocal_w;
 
 						interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
@@ -286,9 +324,12 @@ void pipeline_draw(
 						interpolated_v /= interpolated_reciprocal_w;
 						interpolated_u /= interpolated_reciprocal_w;
 
-						float interpolated_x = (varying_vertices[0].position.x) * alpha + (varying_vertices[1].position.x) * beta + (varying_vertices[2].position.x) * gamma;
-						float interpolated_y = (varying_vertices[0].position.y) * alpha + (varying_vertices[1].position.y) * beta + (varying_vertices[2].position.y) * gamma;
-						float interpolated_z = (varying_vertices[0].position.z) * alpha + (varying_vertices[1].position.z) * beta + (varying_vertices[2].position.z) * gamma;
+						float interpolated_x = (model_x0 / point_a.w) * alpha + (model_x1 / point_b.w) * beta + (model_x2 / point_c.w) * gamma;
+						float interpolated_y = (model_y0 / point_a.w) * alpha + (model_y1 / point_b.w) * beta + (model_y2 / point_c.w) * gamma;
+						float interpolated_z = (model_z0 / point_a.w) * alpha + (model_z1 / point_b.w) * beta + (model_z2 / point_c.w) * gamma;
+						interpolated_x /= interpolated_reciprocal_w;
+						interpolated_y /= interpolated_reciprocal_w;
+						interpolated_z /= interpolated_reciprocal_w;
 
 						interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 

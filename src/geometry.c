@@ -27,6 +27,8 @@ void make_plane_geometry(
 
 	tex2_t *texcoords = NULL;
 
+	int vertices_count = 0;
+
 	for (int iy = 0; iy < grid_y1; iy++) {
 		float y = (float)iy * segment_height - half_height;
 		for (int ix = 0; ix < grid_x1; ix++) {
@@ -35,6 +37,7 @@ void make_plane_geometry(
 			vertex.y = -y;
 			vertex.z = 0;
 			array_push(mesh->vertices, vertex);
+			vertices_count++;
 
 			uv.u = 1 - (float)ix / width_segments;
 			uv.v = 1 - (float)iy / height_segments;
@@ -74,6 +77,8 @@ void make_plane_geometry(
 		}
 
 	}
+
+	mesh->vertices_count = vertices_count;
 
 	array_free(texcoords);
 }
@@ -266,6 +271,7 @@ void build_plane(
 	}
 
 	*vertices_count += vertex_counter;
+	mesh->vertices_count = vertex_counter;
 
 	array_free(texcoords);
 
@@ -287,6 +293,7 @@ void make_box_geometry(
 	build_plane(XZY, 1, -1, width, depth, - height, width_segments, depth_segments, &vertices_count, mesh);
 	build_plane(XYZ, 1, -1, width, height, depth, width_segments, height_segments, &vertices_count, mesh);
 	build_plane(XYZ, -1, -1, width, height, - depth, width_segments, height_segments, &vertices_count, mesh);
+	mesh->vertices_count = vertices_count;
 }
 
 void make_ring_geometry(
@@ -309,6 +316,8 @@ void make_ring_geometry(
 	vec3_t vertex;
 	tex2_t uv;
 
+	int vertices_count = 0;
+
 	for (int j = 0; j <= phi_segments; j++) {
 		for (int i = 0; i <= theta_segments; i++) {
 			float segment = theta_start + ((float)i / (float)theta_segments) * theta_length;
@@ -317,6 +326,7 @@ void make_ring_geometry(
 			vertex.z = 0;
 
 			array_push(mesh->vertices, vertex);
+			vertices_count++;
 
 			uv.u = (vertex.x / outer_radius + 1) / 2;
 			uv.v = (vertex.y / outer_radius + 1) / 2;
@@ -359,6 +369,7 @@ void make_ring_geometry(
 			array_push(mesh->faces, face_b);
 		}
 	}
+	mesh->vertices_count = vertices_count;
 	array_free(texcoords);
 }
 
@@ -375,6 +386,8 @@ void make_torus_geometry(
 	vec3_t vertex;
 	tex2_t uv;
 
+	int vertices_count = 0;
+
 	for (int j = 0; j <= radial_segments; j++) {
 		for (int i = 0; i <= tubular_segments; i++) {
 			float u = (float)i / (float)tubular_segments * arc;
@@ -385,6 +398,7 @@ void make_torus_geometry(
 			vertex.z = tube * sin(v);
 
 			array_push(mesh->vertices, vertex);
+			vertices_count++;
 
 			uv.u = 1 - i / (float)tubular_segments;
 			uv.v = j / (float)radial_segments;
@@ -423,5 +437,7 @@ void make_torus_geometry(
 		}
 
 	}
+
+	mesh->vertices_count = vertices_count;
 
 }

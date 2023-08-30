@@ -75,7 +75,8 @@ void process_input(void) {
 }
 
 void update(void) {
-	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
+	int now = SDL_GetTicks();
+	int time_to_wait = FRAME_TARGET_TIME - (now - previous_frame_time);
 	if (time_to_wait > 0 && time_to_wait < FRAME_TARGET_TIME) {
 		SDL_Delay(time_to_wait);
 	}
@@ -83,14 +84,15 @@ void update(void) {
 	delta_time = (SDL_GetTicks() - previous_frame_time);
 	previous_frame_time = SDL_GetTicks();
 
-	shadow_map_example_update(delta_time);
+	shadow_map_example_update(delta_time, now);
 	// geometry_example_update(delta_time);
 }
 
 void render(void) {
-	clear_color(0xFF000000);
+	int now = SDL_GetTicks();
+	clear_color(0xFF111111);
 	clear_depth();
-	shadow_map_example_render(delta_time);
+	shadow_map_example_render(delta_time, now);
 	// geometry_example_render(delta_time);
 	render_color_buffer();
 }
