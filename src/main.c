@@ -1,6 +1,7 @@
 #ifdef __EMSCRIPTEN__
 	#include "emscripten.h"
 #endif
+#include <time.h>
 #include "stdio.h"
 #include <math.h>
 #include <SDL2/SDL.h>
@@ -16,17 +17,20 @@
 #include "geometry.h"
 
 // #include "examples/geometry-demo.h"
-#include "examples/shadow-map-demo.h"
+// #include "examples/shadow-map-demo.h"
+#include "examples/physics-2d.h"
 
 bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
 
 void setup(void) {
+	srand(time(NULL));
 	set_render_method(RENDER_WIRE);
 	set_cull_method(CULL_BACKFACE);
 	// geometry_example_setup();
-	shadow_map_example_setup();
+	// shadow_map_example_setup();
+	physics2D_example_setup();
 }
 
 void process_input(void) {
@@ -69,8 +73,9 @@ void process_input(void) {
 			return;
 		}
 
-		shadow_map_example_process_input(&event, delta_time);
 		// geometry_example_process_input(&event, delta_time);
+		// shadow_map_example_process_input(&event, delta_time);
+		physics2D_example_process_input(&event, delta_time);
 	}
 }
 
@@ -84,22 +89,25 @@ void update(void) {
 	delta_time = (SDL_GetTicks() - previous_frame_time);
 	previous_frame_time = SDL_GetTicks();
 
-	shadow_map_example_update(delta_time, now);
 	// geometry_example_update(delta_time);
+	// shadow_map_example_update(delta_time, now);
+	physics2D_example_update(delta_time, now);
 }
 
 void render(void) {
 	int now = SDL_GetTicks();
 	clear_color(0xFF111111);
 	clear_depth();
-	shadow_map_example_render(delta_time, now);
 	// geometry_example_render(delta_time);
+	// shadow_map_example_render(delta_time, now);
+	physics2D_example_render(delta_time, now);
 	render_color_buffer();
 }
 
 void free_resources(void) {
-	shadow_map_example_free_resources();
 	// geometry_example_free_resources();
+	// shadow_map_example_free_resources();
+	physics2D_example_free_resources();
 	destroy_window();
 }
 

@@ -48,7 +48,7 @@ bool should_render_filled_triangles(void);
 bool should_render_textured_triangles(void);
 bool should_render_wireframe(void);
 bool should_render_vertex(void);
-void draw_rect(int start_x, int start_y, int width, int height, uint32_t color);
+void draw_rect(int start_x, int start_y, int width, int height, uint32_t color, color_framebuffer* color_buffer);
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color, color_framebuffer* color_buffer);
 void render_color_buffer(void);
 void clear_color(uint32_t color);

@@ -140,6 +140,11 @@ void reorient_jet() {
 }
 
 void shadow_map_example_update(int delta_time, int elapsed_time) {
+	elapsed_time = time(NULL);
+	if (elapsed_time > next_time) {
+		reorient_jet();
+		next_time = time(NULL) + (uint32_t)2;
+	}
 
 	for (int i = 0; i < plane->vertices_count; i++) {
 		vec3_t* vertex = &plane->vertices[i];
@@ -268,12 +273,6 @@ void main_fragment_shader(
 }
 
 void shadow_map_example_render(int delta_time, int elapsed_time) {
-	elapsed_time = time(NULL);
-	if (elapsed_time > next_time) {
-		reorient_jet();
-		next_time = time(NULL) + (uint32_t)2;
-	}
-
 	// render shadow map
 	clear_depth_buffer(shadow_depth_buffer);
 
@@ -307,4 +306,5 @@ void shadow_map_example_render(int delta_time, int elapsed_time) {
 
 void shadow_map_example_free_resources(void) {
 	dispose_meshes();
+	destroy_depth_buffer(shadow_depth_buffer);
 }

@@ -165,7 +165,7 @@ void clear_depth() {
 	clear_depth_buffer(z_buffer);
 }
 
-inline void draw_rect(int x, int y, int width, int height, uint32_t color) {
+inline void draw_rect(int x, int y, int width, int height, uint32_t color, color_framebuffer* color_buffer) {
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			int current_x = x + i;
