@@ -1,11 +1,37 @@
+# C Flags
+CFLAGS += -g
+CFLAGS += -Wall
+CFLAGS += -std=c17
+CFLAGS += -lm
+
+CFLAGS += -D$(DEMO_NAME)
+
+
+
+INCLUDE_FLAGS += -I/opt/homebrew/include
+INCLUDE_FLAGS += -L/opt/homebrew/lib
+
+# SDL flags
+SDLFLAGS += -lSDL2
+
+# Emscripten flags
+EMCCFLAGS += -sUSE_SDL=2
+EMCCFLAGS += -sALLOW_MEMORY_GROWTH
+EMCCFLAGS += --preload-file ./assets
+EMCCFLAGS += --shell-file template.html
+
+EXAMPLES += geometry-example
+EXAMPLES += shadow-map-example
+EXAMPLES += physics2d-example
+
 build:
-	gcc -g -Wall -std=c17 ./src/*.c -I/opt/homebrew/include -L/opt/homebrew/lib -lSDL2 -lm -fprofile-arcs -ftest-coverage -o native-renderer
+	gcc $(CFLAGS) $(INCLUDE_FLAGS) $(SDLFLAGS) ./src/**/*.c ./src/*.c -o $(DEMO_NAME)
 
 build-emscripten:
-	emcc -Wall -std=c17 ./src/*.c -I/opt/homebrew/include -L/opt/homebrew/lib -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH -lm -o renderer.html --preload-file ./assets --shell-file template.html
+	emcc $(CFLAGS) $(INCLUDE_FLAGS) $(EMCCFLAGS) ./src/**/*.c ./src/*.c -o dist/examples/$(DEMO_NAME)/index.html
 
 run:
-	./native-renderer
+	./$(DEMO_NAME)
 
 clean:
 	rm renderer

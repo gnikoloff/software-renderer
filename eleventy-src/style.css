@@ -1,0 +1,36 @@
+body {
+	padding: 2rem;
+	margin: 0;
+	box-sizing: border-box;
+	font-family: ui-monospace,
+							"Cascadia Mono", "Segoe UI Mono",
+							"Ubuntu Mono",
+							"Roboto Mono",
+							Menlo, Monaco, Consolas,
+							monospace;
+}
+
+h1 {
+	margin-top: 0;
+}
+
+#intro {
+	margin-bottom: 3rem;
+}
+
+#container {
+	display: flex;
+}
+
+#sidebar {
+	margin-right: 5rem;
+}
+
+.demo-link {
+	cursor: pointer;
+	margin-bottom: 0.5rem;
+}
+
+.demo-link:last-of-type {
+	margin-bottom: 0;
+}

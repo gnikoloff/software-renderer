@@ -1,4 +1,5 @@
 renderer
 native-renderer
+node_modules
 .vscode
 .DS_Store

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+html(lang="en")
+head
+	meta(charset="UTF-8")
+	meta(http-equiv="X-UA-Compatible" content="IE=edge")
+	meta(name="viewport" content="width=device-width, initial-scale=1.0")
+	link(rel="stylesheet" href="/style.css")
+	title= title
+body
+
+	#intro
+		h1 Software renderer in C
+
+	#container
+		aside#sidebar
+			nav#nav
+				ol
+					li(class="demo-link" data-demo-name="HELLO_TRIANGLE_EXAMPLE") Hello triangle
+					li(class="demo-link" data-demo-name="GEOMETRY_EXAMPLE") Geometry
+					li(class="demo-link" data-demo-name="sdfdsf") Environment mapping
+					li(class="demo-link" data-demo-name="SHADOWMAP_EXAMPLE") Shadow mapping
+					li(class="demo-link" data-demo-name="PHYSICS2D_EXAMPLE") 2D physics
+		main#main
+			iframe#iframe(
+				width="1024"
+				height="768"
+				src="/examples/SHADOWMAP_EXAMPLE"
+			)
+	
+	script(src="/script.js")

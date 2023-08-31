@@ -1,0 +1,26 @@
+{
+  "name": "c-software-renderer",
+  "version": "1.0.0",
+  "description": "Computer graphics running on the CPU in C",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx @11ty/eleventy --serve",
+    "build": "npx @11ty/eleventy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gnikoloff/software-renderer.git"
+  },
+  "author": "Georgi Nikolov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gnikoloff/software-renderer/issues"
+  },
+  "homepage": "https://github.com/gnikoloff/software-renderer#readme",
+  "dependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  },
+  "devDependencies": {
+    "npx": "^10.2.2"
+  }
+}
