@@ -22,10 +22,10 @@ void draw_line_bound(line_t* line) {
 	float line_top = line->bounding_box.y;
 	float line_right = line_left + line->bounding_box.z;
 	float line_bottom = line_top + line->bounding_box.w;
-	draw_line(line_left, line_top, line_right, line_top, 0xff0000ff, get_screen_color_buffer());
-	draw_line(line_right, line_top, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
-	draw_line(line_left, line_top, line_left, line_bottom, 0xff0000ff, get_screen_color_buffer());
-	draw_line(line_left, line_bottom, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
+	draw_line_on_screen(line_left, line_top, line_right, line_top, 0xff0000ff, get_screen_color_buffer());
+	draw_line_on_screen(line_right, line_top, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
+	draw_line_on_screen(line_left, line_top, line_left, line_bottom, 0xff0000ff, get_screen_color_buffer());
+	draw_line_on_screen(line_left, line_bottom, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
 }
 
 void get_line_bounds(line_t* line) {
@@ -49,12 +49,6 @@ void get_line_bounds(line_t* line) {
 }
 
 line_t make_line(float x0, float y0, float x1, float y1) {
-	// if (x1 < x0) {
-	// 	float_swap(&x0, &x1);
-	// }
-	// if (y1 < y0) {
-	// 	float_swap(&y0, &y1);
-	// }
 	line_t line = {
 		.x0 = x0,
 		.y0 = y0,
@@ -136,7 +130,6 @@ void physics2D_example_setup(void) {
 	float vheightf = (float)vheight;
 
 	float step_y = vheight / LINES_COUNT;
-	float half_step_y = step_y / 2;
 
 	float step = M_PI / (LINES_COUNT - 3);
 
@@ -176,9 +169,7 @@ void physics2D_example_process_input(SDL_Event* event, int delta_time) {
 }
 
 void physics2D_example_update(int delta_time, int elapsed_time) {
-	int vwidth = get_viewport_width();
 	int vheight = get_viewport_height();
-
 	for (int i = 0; i < PARTICLES_COUNT; i++) {
 		particle_t* particle = &particles[i];
 		particle->vy += delta_time * GRAVITY;
@@ -205,16 +196,14 @@ void physics2D_example_update(int delta_time, int elapsed_time) {
 }
 
 void physics2D_example_render(int delta_time, int elapsed_time) {
-	int vwidth = get_viewport_width();
-	int vheight = get_viewport_height();
 	for (int i = 0; i < PARTICLES_COUNT; i++) {
 		particle_t* particle = &particles[i];
-		draw_rect(particle->x, particle->y, particle->radius, particle->radius, 0xffaaaaaa, get_screen_color_buffer());
+		draw_rect_on_screen(particle->x, particle->y, particle->radius, particle->radius, 0xffaaaaaa, get_screen_color_buffer());
 	}
 
 	for (int i = 0; i < LINES_COUNT; i++) {
 		line_t* line = &lines[i];
-		draw_line(line->x0, line->y0, line->x1, line->y1, 0xffffffff, get_screen_color_buffer());
+		draw_line_on_screen(line->x0, line->y0, line->x1, line->y1, 0xffffffff, get_screen_color_buffer());
 		// draw_line_bound(&line);
 	}
 }

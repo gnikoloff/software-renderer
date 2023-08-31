@@ -17,8 +17,14 @@
 #include "geometry.h"
 
 // #include "examples/geometry-demo.h"
-// #include "examples/shadow-map-demo.h"
+
+#ifdef SHADOWMAP_EXAMPLE
+#include "examples/shadow-map-demo.h"
+#endif
+
+#ifdef PHYSICS2D_EXAMPLE
 #include "examples/physics-2d.h"
+#endif
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -26,11 +32,13 @@ int delta_time = 0;
 
 void setup(void) {
 	srand(time(NULL));
-	set_render_method(RENDER_WIRE);
-	set_cull_method(CULL_BACKFACE);
 	// geometry_example_setup();
-	// shadow_map_example_setup();
-	physics2D_example_setup();
+	#ifdef SHADOWMAP_EXAMPLE
+		shadow_map_example_setup();
+	#endif
+	#ifdef PHYSICS2D_EXAMPLE
+		physics2D_example_setup();
+	#endif
 }
 
 void process_input(void) {
@@ -40,42 +48,13 @@ void process_input(void) {
 			is_running = false;
 			return;
 		}
-		if (event.key.keysym.sym == SDLK_1) {
-			set_render_method(RENDER_FILL_TRIANGLE);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_2) {
-			set_render_method(RENDER_FILL_TRIANGLE_WIRE);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_3) {
-			set_render_method(RENDER_WIRE);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_4) {
-			set_render_method(RENDER_WIRE_VERTEX);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_5) {
-			set_render_method(RENDER_TEXTURED);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_6) {
-			set_render_method(RENDER_TEXTURED_WIRE);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_c) {
-			set_cull_method(CULL_BACKFACE);
-			return;
-		}
-		if (event.key.keysym.sym == SDLK_x) {
-			set_cull_method(CULL_NONE);
-			return;
-		}
-
 		// geometry_example_process_input(&event, delta_time);
-		// shadow_map_example_process_input(&event, delta_time);
-		physics2D_example_process_input(&event, delta_time);
+		#ifdef SHADOWMAP_EXAMPLE
+			shadow_map_example_process_input(&event, delta_time);
+		#endif
+		#ifdef PHYSICS2D_EXAMPLE
+			physics2D_example_process_input(&event, delta_time);
+		#endif
 	}
 }
 
@@ -90,8 +69,12 @@ void update(void) {
 	previous_frame_time = SDL_GetTicks();
 
 	// geometry_example_update(delta_time);
-	// shadow_map_example_update(delta_time, now);
-	physics2D_example_update(delta_time, now);
+	#ifdef SHADOWMAP_EXAMPLE
+		shadow_map_example_update(delta_time, now);
+	#endif
+	#ifdef PHYSICS2D_EXAMPLE
+		physics2D_example_update(delta_time, now);
+	#endif
 }
 
 void render(void) {
@@ -99,15 +82,23 @@ void render(void) {
 	clear_color(0xFF111111);
 	clear_depth();
 	// geometry_example_render(delta_time);
-	// shadow_map_example_render(delta_time, now);
-	physics2D_example_render(delta_time, now);
+	#ifdef SHADOWMAP_EXAMPLE
+		shadow_map_example_render(delta_time, now);
+	#endif
+	#ifdef PHYSICS2D_EXAMPLE
+		physics2D_example_render(delta_time, now);
+	#endif
 	render_color_buffer();
 }
 
 void free_resources(void) {
 	// geometry_example_free_resources();
-	// shadow_map_example_free_resources();
-	physics2D_example_free_resources();
+	#ifdef SHADOWMAP_EXAMPLE
+		shadow_map_example_free_resources();
+	#endif
+	#ifdef PHYSICS2D_EXAMPLE
+		physics2D_example_free_resources();
+	#endif
 	destroy_window();
 }
 

@@ -14,9 +14,6 @@ static int window_height = 0;
 static color_framebuffer* color_buffer = NULL;
 static depth_framebuffer* z_buffer = NULL;
 
-static int render_method = 0;
-static int cull_method = 0;
-
 color_framebuffer* get_screen_color_buffer(void) {
 	return color_buffer;
 }
@@ -31,38 +28,6 @@ int get_viewport_width(void) {
 
 int get_viewport_height(void) {
 	return window_height;
-}
-
-void set_render_method(int method) {
-	render_method = method;
-}
-
-void set_cull_method(int method) {
-	cull_method = method;
-}
-
-int is_cull_backface(void) {
-	return cull_method == CULL_BACKFACE;
-}
-
-int get_cull_method(void) {
-	return cull_method;
-}
-
-bool should_render_filled_triangles(void) {
-	return render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE;
-}
-
-bool should_render_textured_triangles(void) {
-	return render_method == RENDER_TEXTURED || render_method == RENDER_TEXTURED_WIRE;
-}
-
-bool should_render_wireframe(void) {
-	return render_method == RENDER_WIRE || render_method == RENDER_WIRE_VERTEX || render_method == RENDER_FILL_TRIANGLE_WIRE || render_method == RENDER_TEXTURED_WIRE;
-}
-
-bool should_render_vertex(void) {
-	return render_method == RENDER_WIRE_VERTEX;
 }
 
 float get_depth_at(int x, int y) {
@@ -115,8 +80,8 @@ bool initialize_window(void) {
 		fullscreen_height = display_mode.h;
 	#endif
 
-	window_width = (int)(fullscreen_width / 2);
-	window_height = (int)(fullscreen_height / 2);
+	window_width = (int)(fullscreen_width);
+	window_height = (int)(fullscreen_height);
 	
 	window = SDL_CreateWindow(
 		NULL,
@@ -165,7 +130,7 @@ void clear_depth() {
 	clear_depth_buffer(z_buffer);
 }
 
-inline void draw_rect(int x, int y, int width, int height, uint32_t color, color_framebuffer* color_buffer) {
+inline void draw_rect_on_screen(int x, int y, int width, int height, uint32_t color, color_framebuffer* color_buffer) {
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			int current_x = x + i;
@@ -175,7 +140,7 @@ inline void draw_rect(int x, int y, int width, int height, uint32_t color, color
 	}
 }
 
-inline void draw_line(
+inline void draw_line_on_screen(
 	int x0, int y0,
 	int x1, int y1,
 	uint32_t color,

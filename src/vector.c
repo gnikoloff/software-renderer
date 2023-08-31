@@ -1,7 +1,7 @@
 #include <math.h>
 #include "vector.h"
 
-static const float cEpslion = 1e-6f;
+// static const float cEpslion = 1e-6f;
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 float Q_rsqrt(float number) {

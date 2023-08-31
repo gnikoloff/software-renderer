@@ -2,7 +2,6 @@
 #define GEOMETRY_DEMO_H
 
 #include <SDL2/SDL.h>
-#include "../framebuffer.h"
 
 void geometry_example_setup(void);
 void geometry_example_process_input(SDL_Event* event, int delta_time);
