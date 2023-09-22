@@ -19,6 +19,9 @@ void render_triangle(
 	int y0 = triangle_to_render->vertices[0].position.y;
 	float z0 = triangle_to_render->vertices[0].position.z;
 	float w0 = triangle_to_render->vertices[0].position.w;
+	float n0x = triangle_to_render->vertices[0].normal.x;
+	float n0y = triangle_to_render->vertices[0].normal.y;
+	float n0z = triangle_to_render->vertices[0].normal.z;
 	float u0 = triangle_to_render->vertices[0].uv.u;
 	float v0 = triangle_to_render->vertices[0].uv.v;
 	float model_x0 = triangle_to_render->vertices[0].world_space_position.x;
@@ -30,6 +33,9 @@ void render_triangle(
 	int y1 = triangle_to_render->vertices[1].position.y;
 	float z1 = triangle_to_render->vertices[1].position.z;
 	float w1 = triangle_to_render->vertices[1].position.w;
+	float n1x = triangle_to_render->vertices[1].normal.x;
+	float n1y = triangle_to_render->vertices[1].normal.y;
+	float n1z = triangle_to_render->vertices[1].normal.z;
 	float u1 = triangle_to_render->vertices[1].uv.u;
 	float v1 = triangle_to_render->vertices[1].uv.v;
 	float model_x1 = triangle_to_render->vertices[1].world_space_position.x;
@@ -41,6 +47,9 @@ void render_triangle(
 	int y2 = triangle_to_render->vertices[2].position.y;
 	float z2 = triangle_to_render->vertices[2].position.z;
 	float w2 = triangle_to_render->vertices[2].position.w;
+	float n2x = triangle_to_render->vertices[2].normal.x;
+	float n2y = triangle_to_render->vertices[2].normal.y;
+	float n2z = triangle_to_render->vertices[2].normal.z;
 	float u2 = triangle_to_render->vertices[2].uv.u;
 	float v2 = triangle_to_render->vertices[2].uv.v;
 	float model_x2 = triangle_to_render->vertices[2].world_space_position.x;
@@ -51,10 +60,13 @@ void render_triangle(
 	if (y0 > y1) {
 		int_swap(&y0, &y1);
 		int_swap(&x0, &x1);
-		float_swap(&u0, &u1);
-		float_swap(&v0, &v1);
 		float_swap(&z0, &z1);
 		float_swap(&w0, &w1);
+		float_swap(&n0x, &n1x);
+		float_swap(&n0y, &n1y);
+		float_swap(&n0z, &n1z);
+		float_swap(&u0, &u1);
+		float_swap(&v0, &v1);
 		float_swap(&model_x0, &model_x1);
 		float_swap(&model_y0, &model_y1);
 		float_swap(&model_z0, &model_z1);
@@ -63,10 +75,13 @@ void render_triangle(
 	if (y1 > y2) {
 		int_swap(&y1, &y2);
 		int_swap(&x1, &x2);
-		float_swap(&u1, &u2);
-		float_swap(&v1, &v2);
 		float_swap(&z1, &z2);
 		float_swap(&w1, &w2);
+		float_swap(&n1x, &n2x);
+		float_swap(&n1y, &n2y);
+		float_swap(&n1z, &n2z);
+		float_swap(&u1, &u2);
+		float_swap(&v1, &v2);
 		float_swap(&model_x1, &model_x2);
 		float_swap(&model_y1, &model_y2);
 		float_swap(&model_z1, &model_z2);
@@ -76,10 +91,13 @@ void render_triangle(
 	if (y0 > y1) {
 		int_swap(&y0, &y1);
 		int_swap(&x0, &x1);
-		float_swap(&u0, &u1);
-		float_swap(&v0, &v1);
 		float_swap(&z0, &z1);
 		float_swap(&w0, &w1);
+		float_swap(&n0x, &n1x);
+		float_swap(&n0y, &n1y);
+		float_swap(&n0z, &n1z);
+		float_swap(&u0, &u1);
+		float_swap(&v0, &v1);
 		float_swap(&model_x0, &model_x1);
 		float_swap(&model_y0, &model_y1);
 		float_swap(&model_z0, &model_z1);
@@ -143,6 +161,13 @@ void render_triangle(
 				interpolated_y /= interpolated_reciprocal_w;
 				interpolated_z /= interpolated_reciprocal_w;
 
+				float interpolated_normal_x = (n0x / point_a.w) * alpha + (n1x / point_b.w) * beta + (n2x / point_c.w) * gamma;
+				float interpolated_normal_y = (n0y / point_a.w) * alpha + (n1y / point_b.w) * beta + (n2y / point_c.w) * gamma;
+				float interpolated_normal_z = (n0z / point_a.w) * alpha + (n1z / point_b.w) * beta + (n2z / point_c.w) * gamma;
+				interpolated_normal_x /= interpolated_reciprocal_w;
+				interpolated_normal_y /= interpolated_reciprocal_w;
+				interpolated_normal_z /= interpolated_reciprocal_w;
+
 				interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
 				fragment_shader_triangle_inputs fs_inputs = {
@@ -153,7 +178,10 @@ void render_triangle(
 					.interpolated_w = interpolated_reciprocal_w,
 					.interpolated_world_space_pos_x = interpolated_x,
 					.interpolated_world_space_pos_y = interpolated_y,
-					.interpolated_world_space_pos_z = interpolated_z
+					.interpolated_world_space_pos_z = interpolated_z,
+					.interpolated_normal_x = interpolated_normal_x,
+					.interpolated_normal_y = interpolated_normal_y,
+					.interpolated_normal_z = interpolated_normal_z
 				};
 
 				fragment_shader_result_t fs_out = fs_shader(
@@ -162,12 +190,18 @@ void render_triangle(
 					mesh,
 					&fs_inputs
 				);
-
-				if (fs_out.color_buffer != NULL) {
-					update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
-				}
-				if (fs_out.depth_buffer != NULL) {
-					update_depth_buffer_at(fs_out.depth_buffer, x, y, fs_out.depth);
+				
+				if (fs_out.depth_buffer == NULL) {
+					if (fs_out.color_buffer != NULL) {
+						update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
+					}
+				} else {
+					if (interpolated_reciprocal_w < get_depth_buffer_at(fs_out.depth_buffer, x, y)) {
+						if (fs_out.color_buffer != NULL) {
+							update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
+						}
+						update_depth_buffer_at(fs_out.depth_buffer, x, y, fs_out.depth);
+					}
 				}
 			}
 		}
@@ -219,6 +253,13 @@ void render_triangle(
 				interpolated_y /= interpolated_reciprocal_w;
 				interpolated_z /= interpolated_reciprocal_w;
 
+				float interpolated_normal_x = (n0x / point_a.w) * alpha + (n1x / point_b.w) * beta + (n2x / point_c.w) * gamma;
+				float interpolated_normal_y = (n0y / point_a.w) * alpha + (n1y / point_b.w) * beta + (n2y / point_c.w) * gamma;
+				float interpolated_normal_z = (n0z / point_a.w) * alpha + (n1z / point_b.w) * beta + (n2z / point_c.w) * gamma;
+				interpolated_normal_x /= interpolated_reciprocal_w;
+				interpolated_normal_y /= interpolated_reciprocal_w;
+				interpolated_normal_z /= interpolated_reciprocal_w;
+
 				interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
 				fragment_shader_triangle_inputs fs_inputs = {
@@ -229,7 +270,10 @@ void render_triangle(
 					.interpolated_w = interpolated_reciprocal_w,
 					.interpolated_world_space_pos_x = interpolated_x,
 					.interpolated_world_space_pos_y = interpolated_y,
-					.interpolated_world_space_pos_z = interpolated_z
+					.interpolated_world_space_pos_z = interpolated_z,
+					.interpolated_normal_x = interpolated_normal_x,
+					.interpolated_normal_y = interpolated_normal_y,
+					.interpolated_normal_z = interpolated_normal_z
 				};
 
 				fragment_shader_result_t fs_out = fs_shader(
@@ -239,11 +283,17 @@ void render_triangle(
 					&fs_inputs
 				);
 
-				if (fs_out.color_buffer != NULL) {
-					update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
-				}
-				if (fs_out.depth_buffer != NULL) {
-					update_depth_buffer_at(fs_out.depth_buffer, x, y, fs_out.depth);
+				if (fs_out.depth_buffer == NULL) {
+					if (fs_out.color_buffer != NULL) {
+						update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
+					}
+				} else {
+					if (interpolated_reciprocal_w < get_depth_buffer_at(fs_out.depth_buffer, x, y)) {
+						if (fs_out.color_buffer != NULL) {
+							update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
+						}
+						update_depth_buffer_at(fs_out.depth_buffer, x, y, fs_out.depth);
+					}
 				}
 			}
 		}
@@ -442,17 +492,23 @@ void pipeline_draw(
 	for (int i = 0; i < num_faces; i++) {
 		face_t face = mesh->faces[i];
 		vec3_t face_vertices[3];
+		vec3_t face_normals[3];
 		vec4_t transformed_vertices[3];
 		
 		face_vertices[0] = mesh->vertices[face.a];
 		face_vertices[1] = mesh->vertices[face.b];
 		face_vertices[2] = mesh->vertices[face.c];
 
+		face_normals[0] = mesh->normals[face.a];
+		face_normals[1] = mesh->normals[face.b];
+		face_normals[2] = mesh->normals[face.c];
+
 		for (int j = 0; j < 3; j++) {
 			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 			vec4_t world_space_vertex = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
 			transformed_vertices[j] = world_space_vertex;
 			varying_world_vertices[j].position = world_space_vertex;
+			varying_world_vertices[j].normal = face_normals[j];
 			
 			if (camera_type == PERSPECTIVE_CAMERA) {
 				transformed_vertices[j] = mat4_mul_vec4(persp_camera->view_matrix, transformed_vertices[j]);
@@ -461,25 +517,30 @@ void pipeline_draw(
 			}
 		}
 
+		vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
+		vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]); /*  / \  */
+		vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]); /* C---B */
+
+		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+		vec3_normalize(&vector_ab);
+		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+		vec3_normalize(&vector_ac);
+		
+		vec3_t vector_normal = vec3_cross(vector_ab, vector_ac);
+		vec3_normalize(&vector_normal);
+
+		vec3_t origin = { 0, 0, 0 };
+		vec3_t camera_ray = vec3_sub(origin, vector_a);
+
+		float dot_normal_camera = vec3_dot(vector_normal, camera_ray);
+
 		if (cull_mode == CULL_BACKFACE) {
-			vec3_t vector_a = vec3_from_vec4(transformed_vertices[0]); /*   A   */
-			vec3_t vector_b = vec3_from_vec4(transformed_vertices[1]); /*  / \  */
-			vec3_t vector_c = vec3_from_vec4(transformed_vertices[2]); /* C---B */
-
-			vec3_t vector_ab = vec3_sub(vector_b, vector_a);
-			vec3_normalize(&vector_ab);
-			vec3_t vector_ac = vec3_sub(vector_c, vector_a);
-			vec3_normalize(&vector_ac);
-			
-			vec3_t vector_normal = vec3_cross(vector_ab, vector_ac);
-			vec3_normalize(&vector_normal);
-
-			vec3_t origin = { 0, 0, 0 };
-			vec3_t camera_ray = vec3_sub(origin, vector_a);
-
-			float dot_normal_camera = vec3_dot(vector_normal, camera_ray);
-
 			if (dot_normal_camera < 0) {
+				continue;
+			}
+		}
+		if (cull_mode == CULL_FRONTFACE) {
+			if (dot_normal_camera > 0) {
 				continue;
 			}
 		}
@@ -491,6 +552,9 @@ void pipeline_draw(
 			vec3_from_vec4(varying_world_vertices[0].position),
 			vec3_from_vec4(varying_world_vertices[1].position),
 			vec3_from_vec4(varying_world_vertices[2].position),
+			varying_world_vertices[0].normal,
+			varying_world_vertices[1].normal,
+			varying_world_vertices[2].normal,
 			face.a_uv,
 			face.b_uv,
 			face.c_uv

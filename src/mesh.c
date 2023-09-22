@@ -7,7 +7,7 @@
 #include "array.h"
 #include "geometry.h"
 
-#define MAX_NUM_MESHES 10
+#define MAX_NUM_MESHES 20
 
 static mesh_t meshes[MAX_NUM_MESHES];
 static int mesh_count = 0;
@@ -266,13 +266,7 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 }
 
 void load_mesh_png_data(mesh_t* mesh, char* png_filename) {
-	upng_t* png_image = upng_new_from_file(png_filename);
-	if (png_image != NULL) {
-		upng_decode(png_image);
-		if (upng_get_error(png_image) == UPNG_EOK) {
-			mesh->texture = png_image;
-		}
-	}
+	mesh->texture = load_png_data(png_filename);
 }
 
 void init_mesh_common_properties(mesh_t* mesh) {

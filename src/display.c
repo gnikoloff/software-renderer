@@ -80,8 +80,8 @@ bool initialize_window(void) {
 		fullscreen_height = display_mode.h;
 	#endif
 
-	window_width = (int)(fullscreen_width);
-	window_height = (int)(fullscreen_height);
+	window_width = (int)(fullscreen_width) / 2;
+	window_height = (int)(fullscreen_height) / 2;
 	
 	window = SDL_CreateWindow(
 		NULL,
@@ -143,8 +143,7 @@ inline void draw_rect_on_screen(int x, int y, int width, int height, uint32_t co
 inline void draw_line_on_screen(
 	int x0, int y0,
 	int x1, int y1,
-	uint32_t color,
-	color_framebuffer* color_buffer
+	uint32_t color
 ) {
 	int delta_x = x1 - x0;
 	int delta_y = y1 - y0;

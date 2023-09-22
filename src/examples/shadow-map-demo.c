@@ -1,7 +1,6 @@
 #include "stdio.h"
 #include "math.h"
 #include <time.h> 
-#include <SDL2/SDL.h>
 #include "../utils.h"
 #include "../array.h"
 #include "../vector.h"
@@ -11,7 +10,6 @@
 #include "../clipping.h"
 #include "../geometry.h"
 #include "../triangle.h"
-#include "../light.h"
 #include "../pipeline.h"
 
 #define SHADOW_DEPTH_BUFFER_SIZE 512
@@ -211,7 +209,7 @@ fragment_shader_result_t depth_fragment_shader(
 	return fs_out;
 }
 
-void main_vertex_shader(
+static void main_vertex_shader(
 	int camera_type,
 	void* camera,
 	mesh_t* mesh,
@@ -228,7 +226,7 @@ void main_vertex_shader(
 	vertex->position.y += half_viewport_height;
 }
 
-fragment_shader_result_t efa_triangle_fragment_shader(
+static fragment_shader_result_t efa_triangle_fragment_shader(
 	int camera_type,
 	void* camera,
 	mesh_t* mesh,

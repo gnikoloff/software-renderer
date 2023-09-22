@@ -62,44 +62,6 @@ freely, subject to the following restrictions:
 #define upng_chunk_type(chunk) MAKE_DWORD_PTR((chunk) + 4)
 #define upng_chunk_critical(chunk) (((chunk)[4] & 32) == 0)
 
-typedef enum upng_state {
-	UPNG_ERROR		= -1,
-	UPNG_DECODED	= 0,
-	UPNG_HEADER		= 1,
-	UPNG_NEW		= 2
-} upng_state;
-
-typedef enum upng_color {
-	UPNG_LUM		= 0,
-	UPNG_RGB		= 2,
-	UPNG_LUMA		= 4,
-	UPNG_RGBA		= 6
-} upng_color;
-
-typedef struct upng_source {
-	const unsigned char*	buffer;
-	unsigned long			size;
-	char					owning;
-} upng_source;
-
-struct upng_t {
-	unsigned		width;
-	unsigned		height;
-
-	upng_color		color_type;
-	unsigned		color_depth;
-	upng_format		format;
-
-	unsigned char*	buffer;
-	unsigned long	size;
-
-	upng_error		error;
-	unsigned		error_line;
-
-	upng_state		state;
-	upng_source		source;
-};
-
 typedef struct huffman_tree {
 	unsigned* tree2d;
 	unsigned maxbitlen;	/*maximum number of bits a single code can get */

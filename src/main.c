@@ -26,6 +26,14 @@
 #include "examples/physics-2d.h"
 #endif
 
+#ifdef DEPTHBUFFER_EXAMPLE
+#include "examples/depth-buffer-demo.h"
+#endif
+
+#ifdef ENVIRONMENTMAPPING_EXAMPLE
+#include "examples/environment-mapping.h"
+#endif
+
 bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
@@ -38,6 +46,12 @@ void setup(void) {
 	#endif
 	#ifdef PHYSICS2D_EXAMPLE
 		physics2D_example_setup();
+	#endif
+	#ifdef DEPTHBUFFER_EXAMPLE
+		depth_buffer_example_setup();
+	#endif
+	#ifdef ENVIRONMENTMAPPING_EXAMPLE
+		environment_mapping_example_setup();
 	#endif
 }
 
@@ -54,6 +68,12 @@ void process_input(void) {
 		#endif
 		#ifdef PHYSICS2D_EXAMPLE
 			physics2D_example_process_input(&event, delta_time);
+		#endif
+		#ifdef DEPTHBUFFER_EXAMPLE
+			depth_buffer_example_process_input(&event, delta_time);
+		#endif
+		#ifdef ENVIRONMENTMAPPING_EXAMPLE
+			environment_mapping_example_process_input(&event, delta_time);
 		#endif
 	}
 }
@@ -75,6 +95,12 @@ void update(void) {
 	#ifdef PHYSICS2D_EXAMPLE
 		physics2D_example_update(delta_time, now);
 	#endif
+	#ifdef DEPTHBUFFER_EXAMPLE
+		depth_buffer_example_update(delta_time, now);
+	#endif
+	#ifdef ENVIRONMENTMAPPING_EXAMPLE
+		environment_mapping_example_update(delta_time, now);
+	#endif
 }
 
 void render(void) {
@@ -88,6 +114,12 @@ void render(void) {
 	#ifdef PHYSICS2D_EXAMPLE
 		physics2D_example_render(delta_time, now);
 	#endif
+	#ifdef DEPTHBUFFER_EXAMPLE
+		depth_buffer_example_render(delta_time, now);
+	#endif
+	#ifdef ENVIRONMENTMAPPING_EXAMPLE
+		environment_mapping_example_render(delta_time, now);
+	#endif
 	render_color_buffer();
 }
 
@@ -99,6 +131,13 @@ void free_resources(void) {
 	#ifdef PHYSICS2D_EXAMPLE
 		physics2D_example_free_resources();
 	#endif
+	#ifdef DEPTHBUFFER_EXAMPLE
+		depth_buffer_example_free_resources();
+	#endif
+	#ifdef ENVIRONMENTMAPPING_EXAMPLE
+		environment_mapping_example_free_resources();
+	#endif
+	
 	destroy_window();
 }
 

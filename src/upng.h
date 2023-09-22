@@ -55,7 +55,43 @@ typedef enum upng_format {
 	UPNG_LUMINANCE_ALPHA8
 } upng_format;
 
-typedef struct upng_t upng_t;
+typedef enum upng_state {
+	UPNG_ERROR		= -1,
+	UPNG_DECODED	= 0,
+	UPNG_HEADER		= 1,
+	UPNG_NEW		= 2
+} upng_state;
+
+typedef struct upng_source {
+	const unsigned char*	buffer;
+	unsigned long			size;
+	char					owning;
+} upng_source;
+
+typedef enum upng_color {
+	UPNG_LUM		= 0,
+	UPNG_RGB		= 2,
+	UPNG_LUMA		= 4,
+	UPNG_RGBA		= 6
+} upng_color;
+
+typedef struct {
+	unsigned		width;
+	unsigned		height;
+
+	upng_color		color_type;
+	unsigned		color_depth;
+	upng_format		format;
+
+	unsigned char*	buffer;
+	unsigned long	size;
+
+	upng_error		error;
+	unsigned		error_line;
+
+	upng_state		state;
+	upng_source		source;
+} upng_t;
 
 upng_t*		upng_new_from_bytes	(const unsigned char* buffer, unsigned long size);
 upng_t*		upng_new_from_file	(const char* path);

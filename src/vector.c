@@ -42,12 +42,9 @@ inline vec2_t vec2_add(vec2_t a, vec2_t b) {
 	return result;
 }
 
-inline vec2_t vec2_sub(vec2_t a, vec2_t b) {
-	vec2_t result = {
-		.x = a.x - b.x,
-		.y = a.y - b.y
-	};
-	return result;
+inline void vec2_sub(vec2_t* result, vec2_t* a, vec2_t* b) {
+	result->x = a->x - b->x;
+	result->y = a->y - b->y;
 }
 
 inline vec2_t vec2_mul(vec2_t v, float factor) {
@@ -143,6 +140,27 @@ inline vec3_t vec3_cross(vec3_t a, vec3_t b) {
 		.z = a.x * b.y - a.y * b.x
 	};
 	return result;
+}
+
+// https://asawicki.info/news_1301_reflect_and_refract_functions.html
+// reflect and refract methods
+inline vec3_t vec3_reflect(vec3_t incident_vec, vec3_t normal) {
+	float dot = vec3_dot(incident_vec, normal);
+	vec3_t normal_scaled = vec3_mul(normal, dot * 2);
+	return vec3_sub(incident_vec, normal_scaled);
+}
+
+inline vec3_t vec3_refract(vec3_t incident_vec, vec3_t normal, float eta) {
+	float N_dot_I = vec3_dot(normal, incident_vec);
+  float k = 1.f - eta * eta * (1.f - N_dot_I * N_dot_I);
+	vec3_t out;
+  if (k < 0.f) {
+    out = vec3_new(0, 0, 0);
+  } else {
+		vec3_t eta_incident_vec = vec3_mul(incident_vec, eta);
+    out = vec3_sub(eta_incident_vec, vec3_mul(normal, eta * N_dot_I + sqrtf(k)));
+	}
+	return out;
 }
 
 inline float vec3_dot(vec3_t a, vec3_t b) {

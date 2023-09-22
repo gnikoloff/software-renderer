@@ -12,6 +12,7 @@
 
 typedef struct {
 	vec4_t position;
+	vec3_t normal;
 	vec4_t world_space_position;
 	tex2_t uv;
 	uint32_t color;

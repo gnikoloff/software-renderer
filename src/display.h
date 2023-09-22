@@ -26,7 +26,7 @@ int get_viewport_width(void);
 int get_viewport_height(void);
 
 void draw_rect_on_screen(int start_x, int start_y, int width, int height, uint32_t color, color_framebuffer* color_buffer);
-void draw_line_on_screen(int x0, int y0, int x1, int y1, uint32_t color, color_framebuffer* color_buffer);
+void draw_line_on_screen(int x0, int y0, int x1, int y1, uint32_t color);
 void render_color_buffer(void);
 void clear_color(uint32_t color);
 void clear_depth();

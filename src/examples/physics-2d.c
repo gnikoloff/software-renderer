@@ -22,10 +22,10 @@ void draw_line_bound(line_t* line) {
 	float line_top = line->bounding_box.y;
 	float line_right = line_left + line->bounding_box.z;
 	float line_bottom = line_top + line->bounding_box.w;
-	draw_line_on_screen(line_left, line_top, line_right, line_top, 0xff0000ff, get_screen_color_buffer());
-	draw_line_on_screen(line_right, line_top, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
-	draw_line_on_screen(line_left, line_top, line_left, line_bottom, 0xff0000ff, get_screen_color_buffer());
-	draw_line_on_screen(line_left, line_bottom, line_right, line_bottom, 0xff0000ff, get_screen_color_buffer());
+	draw_line_on_screen(line_left, line_top, line_right, line_top, 0xff0000ff);
+	draw_line_on_screen(line_right, line_top, line_right, line_bottom, 0xff0000ff);
+	draw_line_on_screen(line_left, line_top, line_left, line_bottom, 0xff0000ff);
+	draw_line_on_screen(line_left, line_bottom, line_right, line_bottom, 0xff0000ff);
 }
 
 void get_line_bounds(line_t* line) {
@@ -203,7 +203,7 @@ void physics2D_example_render(int delta_time, int elapsed_time) {
 
 	for (int i = 0; i < LINES_COUNT; i++) {
 		line_t* line = &lines[i];
-		draw_line_on_screen(line->x0, line->y0, line->x1, line->y1, 0xffffffff, get_screen_color_buffer());
+		draw_line_on_screen(line->x0, line->y0, line->x1, line->y1, 0xffffffff);
 		// draw_line_bound(&line);
 	}
 }

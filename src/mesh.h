@@ -6,11 +6,13 @@
 #include "quaternion.h"
 #include "triangle.h"
 #include "upng.h"
+#include "texture.h"
 
 typedef struct {
 	vec3_t* vertices;
+	vec3_t* normals;
 	face_t* faces;
-	upng_t* texture;
+	texture_2d_t* texture;
 
 	vec3_t rotation;
 	vec3_t scale;

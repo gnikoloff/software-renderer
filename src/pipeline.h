@@ -6,7 +6,8 @@
 
 enum cull_mode {
 	CULL_NONE,
-	CULL_BACKFACE
+	CULL_BACKFACE,
+	CULL_FRONTFACE
 };
 
 enum render_mode {
@@ -38,6 +39,9 @@ typedef struct {
 	float interpolated_world_space_pos_x;
 	float interpolated_world_space_pos_y;
 	float interpolated_world_space_pos_z;
+	float interpolated_normal_x;
+	float interpolated_normal_y;
+	float interpolated_normal_z;
 } fragment_shader_triangle_inputs;
 
 typedef struct {

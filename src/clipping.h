@@ -25,6 +25,7 @@ typedef struct {
 typedef struct {
 	vec3_t camera_space_vertices[MAX_NUMBER_POLY_VERTICES];
 	vec3_t world_space_vertices[MAX_NUMBER_POLY_VERTICES];
+	vec3_t normals[MAX_NUMBER_POLY_VERTICES];
 	tex2_t texcoords[MAX_NUMBER_POLY_VERTICES];
 	int num_vertices;
 } polygon_t;
@@ -37,6 +38,9 @@ polygon_t create_polygon_from_triangles(
 	vec3_t world_v0,
 	vec3_t world_v1,
 	vec3_t world_v2,
+	vec3_t normal_v0,
+	vec3_t normal_v1,
+	vec3_t normal_v2,
 	tex2_t t0,
 	tex2_t t1,
 	tex2_t t2

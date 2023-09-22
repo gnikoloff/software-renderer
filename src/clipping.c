@@ -51,6 +51,9 @@ polygon_t create_polygon_from_triangles(
 	vec3_t world_v0,
 	vec3_t world_v1,
 	vec3_t world_v2,
+	vec3_t normal_v0,
+	vec3_t normal_v1,
+	vec3_t normal_v2,
 	tex2_t t0,
 	tex2_t t1,
 	tex2_t t2
@@ -58,6 +61,7 @@ polygon_t create_polygon_from_triangles(
 	polygon_t polygon = {
 		.camera_space_vertices = { view_projection_v0, view_projection_v1, view_projection_v2 },
 		.world_space_vertices = { world_v0, world_v1, world_v2 },
+		.normals = { normal_v0, normal_v1, normal_v2 },
 		.texcoords = { t0, t1, t2 },
 		.num_vertices = 3
 	};
@@ -74,16 +78,19 @@ void triangles_from_polygon(polygon_t* polygon, triangle_t triangles[], int* num
 		vertex_t vertex_a = {
 			.position = vec4_from_vec3(polygon->camera_space_vertices[index0]),
 			.world_space_position = vec4_from_vec3(polygon->world_space_vertices[index0]),
+			.normal = vec3_clone(&polygon->normals[index0]),
 			.uv = polygon->texcoords[index0],
 		};
 		vertex_t vertex_b = {
 			.position = vec4_from_vec3(polygon->camera_space_vertices[index1]),
 			.world_space_position = vec4_from_vec3(polygon->world_space_vertices[index1]),
+			.normal = vec3_clone(&polygon->normals[index1]),
 			.uv = polygon->texcoords[index1],
 		};
 		vertex_t vertex_c = {
 			.position = vec4_from_vec3(polygon->camera_space_vertices[index2]),
 			.world_space_position = vec4_from_vec3(polygon->world_space_vertices[index2]),
+			.normal = vec3_clone(&polygon->normals[index2]),
 			.uv = polygon->texcoords[index2],
 		};
 
@@ -101,6 +108,7 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 
 	vec3_t inside_camera_space_vertices[MAX_NUMBER_POLY_VERTICES];
 	vec3_t inside_world_space_vertices[MAX_NUMBER_POLY_VERTICES];
+	vec3_t inside_normals[MAX_NUMBER_POLY_VERTICES];
 	tex2_t inside_texcoords[MAX_NUMBER_POLY_VERTICES];
 	int num_inside_vertices = 0;
 
@@ -109,6 +117,9 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 
 	vec3_t* current_world_space_vertex = &polygon->world_space_vertices[0];
 	vec3_t* prev_world_space_vertex = &polygon->world_space_vertices[polygon->num_vertices - 1];
+
+	vec3_t* current_normal = &polygon->normals[0];
+	vec3_t* prev_normal = &polygon->normals[polygon->num_vertices - 1];
 
 	tex2_t* current_texcoord = &polygon->texcoords[0];
 	tex2_t* prev_texcoord = &polygon->texcoords[polygon->num_vertices - 1];
@@ -139,6 +150,11 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 				.y = float_lerp(prev_world_space_vertex->y, current_world_space_vertex->y, t),
 				.z = float_lerp(prev_world_space_vertex->z, current_world_space_vertex->z, t)
 			};
+			vec3_t intersection_normal = {
+				.x = float_lerp(prev_normal->x, current_normal->x, t),
+				.y = float_lerp(prev_normal->y, current_normal->y, t),
+				.z = float_lerp(prev_normal->z, current_normal->z, t)
+			};
 
 			tex2_t interpolated_texcoord = {
 				.u = float_lerp(prev_texcoord->u, current_texcoord->u, t),
@@ -147,6 +163,7 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 
 			inside_camera_space_vertices[num_inside_vertices] = vec3_clone(&intersection_camera_space_point);
 			inside_world_space_vertices[num_inside_vertices] = vec3_clone(&intersection_world_space_point);
+			inside_normals[num_inside_vertices] = vec3_clone(&intersection_normal);
 			inside_texcoords[num_inside_vertices] = interpolated_texcoord;
 
 			num_inside_vertices++;
@@ -155,6 +172,7 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 		if (current_dot > 0) {
 			inside_camera_space_vertices[num_inside_vertices] = vec3_clone(current_camera_space_vertex);
 			inside_world_space_vertices[num_inside_vertices] = vec3_clone(current_world_space_vertex);
+			inside_normals[num_inside_vertices] = vec3_clone(current_normal);
 			inside_texcoords[num_inside_vertices] = tex2_clone(current_texcoord);
 			num_inside_vertices++;
 		}
@@ -162,16 +180,19 @@ void clip_polygon_against_plane(polygon_t* polygon, int plane) {
 		prev_dot = current_dot;
 		prev_camera_space_vertex = current_camera_space_vertex;
 		prev_world_space_vertex = current_world_space_vertex;
+		prev_normal = current_normal;
 		prev_texcoord = current_texcoord;
 
 		current_camera_space_vertex++;
 		current_world_space_vertex++;
+		current_normal++;
 		current_texcoord++;
 	}
 
 	for (int i = 0; i < num_inside_vertices; i++) {
 		polygon->camera_space_vertices[i] = vec3_clone(&inside_camera_space_vertices[i]);
 		polygon->world_space_vertices[i] = vec3_clone(&inside_world_space_vertices[i]);
+		polygon->normals[i] = vec3_clone(&inside_normals[i]);
 		polygon->texcoords[i] = tex2_clone(&inside_texcoords[i]);
 	}
 	polygon->num_vertices = num_inside_vertices;

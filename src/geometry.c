@@ -37,11 +37,13 @@ void make_plane_geometry(
 			vertex.y = -y;
 			vertex.z = 0;
 			array_push(mesh->vertices, vertex);
-			vertices_count++;
+
+			array_push(mesh->normals, vec3_new(0, 0, 1));
 
 			uv.u = 1 - (float)ix / width_segments;
 			uv.v = 1 - (float)iy / height_segments;
 			array_push(texcoords, uv);
+			vertices_count++;
 		}
 	}
 
@@ -100,7 +102,6 @@ void make_sphere_geometry(
 	int index = 0;
 	int grid[height_segments + 1][width_segments + 1];
 
-	vec3_t* vertices = NULL;
 	tex2_t* texcoords = NULL;
 
 	tex2_t uv;
@@ -121,7 +122,11 @@ void make_sphere_geometry(
 			vertex.x = -radius * cos(phi_start + u * phi_length) * sin(theta_start + v * theta_length);
 			vertex.y = radius * cos(theta_start + v * theta_length);
 			vertex.z = radius * sin(phi_start + u * phi_length) * sin(theta_start + v * theta_length);
-			array_push(vertices, vertex);
+			array_push(mesh->vertices, vertex);
+
+			vec3_t normal = vec3_clone(&vertex);
+			vec3_normalize(&normal);
+			array_push(mesh->normals, normal);
 
 			uv.u = 1 - (u + u_offset);
 			uv.v = 1 - v;
@@ -129,7 +134,6 @@ void make_sphere_geometry(
 
 			grid[iy][ix] = index++;
 		}
-
 	}
 
 	for (int iy = 0; iy < height_segments; iy++) {
@@ -166,7 +170,6 @@ void make_sphere_geometry(
 		}
 	}
 
-	mesh->vertices = vertices;
 	array_free(texcoords);
 }
 
@@ -223,6 +226,7 @@ void build_plane(
 				vertex.y = y * vdir;
 				vertex.z = half_depth;
 			}
+			array_push(mesh->normals, vertex);
 			array_push(mesh->vertices, vertex);
 			
 			uv.u = 1 - (float)ix / (float)grid_x;
