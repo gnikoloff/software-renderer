@@ -105,7 +105,6 @@ void shadow_map_example_process_input(SDL_Event* event, int delta_time) {
 
 void reorient_jet() {
 	int r = rand() % 6;
-	// printf("%i\n", r);
 	if (r == 0) {
 		jet_rotation_target.x += M_PI * 2;
 		jet_position_target.x = 1;
@@ -145,8 +144,6 @@ void shadow_map_example_update(int delta_time, int elapsed_time) {
 		vertex->z = sin(elapsed_time * 0.002 + vertex->x) * 0.2;
 	}
 
-	printf("%i\n", elapsed_time);
-
 	jet_position_target.z = sin(elapsed_time * 0.001) * 3;
 	jet_position_target.y = cos(elapsed_time * 0.001) * 1 + 2;
 
@@ -168,10 +165,6 @@ void shadow_map_example_update(int delta_time, int elapsed_time) {
 	efa->rotation.z += y_delta * 0.2;
 
 	efa->rotation.z += (jet_rotation_target.z - efa->rotation.z) * (delta_time * 0.0015);
-
-	// efa->translation.y = sin(time * delta_multiplier) * 2 + 3;
-	// efa->translation.z = cos(time * delta_multiplier) * 3;
-	// efa->rotation.x += delta_time * delta_multiplier * 3;
 }
 
 void depth_vertex_shader(
@@ -195,16 +188,9 @@ fragment_shader_result_t depth_fragment_shader(
 	void* fs_inputs
 ) {
 	fragment_shader_triangle_inputs* inputs = (fragment_shader_triangle_inputs*)fs_inputs;
-	// uint8_t a = round((1 - inputs->interpolated_w) * 255.0);
-	// uint8_t test_color[4] = {1, a, a, a};
-	// uint32_t color = u8_to_u32(test_color);
-	// update_color_buffer_at(get_screen_color_buffer(), x, y, color);
-	// update_depth_buffer_at(shadow_depth_buffer, x, y, 1 - interpolated_w);
 	fragment_shader_result_t fs_out = {
 		.depth_buffer = shadow_depth_buffer,
 		.depth = 1 - inputs->interpolated_w
-		// .color_buffer = get_screen_color_buffer(),
-		// .color = color,
 	};
 	return fs_out;
 }
@@ -311,8 +297,10 @@ fragment_shader_result_t plane_fragment_shader(
 }
 
 void shadow_map_example_render(int delta_time, int elapsed_time) {
-	// render shadow map
+	
 	clear_depth_buffer(shadow_depth_buffer);
+
+	// render shadow map
 
 	pipeline_draw(
 		ORTHOGRAPHIC_CAMERA,
@@ -325,6 +313,7 @@ void shadow_map_example_render(int delta_time, int elapsed_time) {
 	);
 
 	// render main scene
+
 	pipeline_draw(
 		PERSPECTIVE_CAMERA,
 		persp_camera,
@@ -344,24 +333,6 @@ void shadow_map_example_render(int delta_time, int elapsed_time) {
 		main_vertex_shader,
 		efa_triangle_fragment_shader
 	);
-	// pipeline_draw(
-	// 	PERSPECTIVE_CAMERA,
-	// 	persp_camera,
-	// 	efa,
-	// 	CULL_BACKFACE,
-	// 	RENDER_WIRE,
-	// 	main_vertex_shader,
-	// 	efa_line_fragment_shader
-	// );
-	// pipeline_draw(
-	// 	PERSPECTIVE_CAMERA,
-	// 	persp_camera,
-	// 	efa,
-	// 	CULL_BACKFACE,
-	// 	RENDER_VERTEX,
-	// 	main_vertex_shader,
-	// 	efa_points_fragment_shader
-	// );
 }
 
 void shadow_map_example_free_resources(void) {
