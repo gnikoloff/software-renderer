@@ -34,6 +34,10 @@
 #include "examples/environment-mapping.h"
 #endif
 
+#ifdef PLASMA_EXAMPLE
+#include "examples/plasma-demo.h"
+#endif
+
 bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
@@ -52,6 +56,9 @@ void setup(void) {
 	#endif
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
 		environment_mapping_example_setup();
+	#endif
+	#ifdef PLASMA_EXAMPLE
+		plasma_demo_setup();
 	#endif
 }
 
@@ -74,6 +81,9 @@ void process_input(void) {
 		#endif
 		#ifdef ENVIRONMENTMAPPING_EXAMPLE
 			environment_mapping_example_process_input(&event, delta_time);
+		#endif
+		#ifdef PLASMA_EXAMPLE
+			plasma_demo_process_input(&event, delta_time);
 		#endif
 	}
 }
@@ -101,6 +111,9 @@ void update(void) {
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
 		environment_mapping_example_update(delta_time, now);
 	#endif
+	#ifdef PLASMA_EXAMPLE
+		plasma_demo_update(delta_time, now);
+	#endif
 }
 
 void render(void) {
@@ -120,6 +133,9 @@ void render(void) {
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
 		environment_mapping_example_render(delta_time, now);
 	#endif
+	#ifdef PLASMA_EXAMPLE
+		plasma_demo_render(delta_time, now);
+	#endif
 	render_color_buffer();
 }
 
@@ -136,6 +152,9 @@ void free_resources(void) {
 	#endif
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
 		environment_mapping_example_free_resources();
+	#endif
+	#ifdef PLASMA_EXAMPLE
+		plasma_demo_free_resources();
 	#endif
 	
 	destroy_window();

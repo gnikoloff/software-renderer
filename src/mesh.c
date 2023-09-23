@@ -231,6 +231,13 @@ void load_mesh_obj_data(mesh_t* mesh, char* obj_filename) {
 			array_push(texcoords, texcoord);
 		}
 
+		// Normal
+		if (strncmp(line, "vn ", 3) == 0) {
+			vec3_t normal;
+			sscanf(line, "vn %f %f %f", &normal.x, &normal.y, &normal.z);
+			array_push(mesh->normals, normal);
+		}
+
 		// Face information
 		if (strncmp(line, "f ", 2) == 0) {
 			int vertex_indices[3];

@@ -104,8 +104,8 @@ bool initialize_window(void) {
 	}
 
 	#ifndef __EMSCRIPTEN__
-		// SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-		SDL_SetWindowSize(window, window_width, window_height);
+		SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+		// SDL_SetWindowSize(window, window_width, window_height);
 	#endif
 	
 	color_buffer = make_color_buffer(window_width, window_height);
