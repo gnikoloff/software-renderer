@@ -8,7 +8,7 @@ module.exports = function(eleventyConfig) {
       input: "eleventy-src",
       includes: "_includes",
       data: "_data",
-      output: "dist"
+      output: "docs"
     }
   };
 };
