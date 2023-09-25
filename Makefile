@@ -28,7 +28,7 @@ build:
 	gcc $(CFLAGS) $(INCLUDE_FLAGS) $(SDLFLAGS) ./src/**/*.c ./src/*.c -o $(DEMO_NAME)
 
 build-emscripten:
-	emcc $(CFLAGS) $(INCLUDE_FLAGS) $(EMCCFLAGS) ./src/**/*.c ./src/*.c -o dist/examples/$(DEMO_NAME)/index.html
+	emcc $(CFLAGS) $(INCLUDE_FLAGS) $(EMCCFLAGS) ./src/**/*.c ./src/*.c -o docs/examples/$(DEMO_NAME)/index.html
 
 run:
 	./$(DEMO_NAME)
