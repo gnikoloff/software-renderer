@@ -1,3 +1,5 @@
+const PROJECT_NAME = "Software renderizer dojo"
+
 let $containerWrapper;
 let $nav;
 let $iframe;
@@ -16,6 +18,9 @@ function init() {
 	$loader = document.getElementById("lds-dual-ring");
 	$mobileInfoBtn = document.getElementById("mobile-info");
 	$listItems = document.getElementsByClassName("demo-link");
+
+	const $activeListItem = document.querySelector('.demo-link.active');
+	document.title = `${$activeListItem.textContent.trim()} | ${PROJECT_NAME}`;
 
 	// $iframe.setAttribute(`width`, `${innerWidth}px`);
 	// $iframe.setAttribute(`height`, `${innerHeight}px`);
@@ -48,6 +53,8 @@ function onNavClick(e) {
 		if (e.target.classList.contains("active")) {
 			return;
 		}
+		const title = e.target.textContent.trim();
+		document.title = `${title} | ${PROJECT_NAME}`;
 		const demoName = e.target.getAttribute("data-demo-name");
 		$iframe.setAttribute("src", `/examples/${demoName}`);
 		$loader.classList.add("visible");

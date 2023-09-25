@@ -7,10 +7,11 @@
 * {
 	pointer-events: none;
 	box-sizing: border-box;
+	touch-action: manipulation;
 }
 
 body {
-	padding: 2rem;
+	padding: 0;
 	margin: 0;
 	box-sizing: border-box;
 	font-family: ui-monospace,
@@ -19,6 +20,7 @@ body {
 							"Roboto Mono",
 							Menlo, Monaco, Consolas,
 							monospace;
+	user-select: none; /* Standard syntax */
 }
 
 iframe {
@@ -98,9 +100,6 @@ a {
 }
 
 #main {
-	position: fixed;
-	top: 0;
-	left: 0;
 	width: 100%;
 	height: 100%;
 }

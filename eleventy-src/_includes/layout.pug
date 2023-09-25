@@ -3,7 +3,8 @@ html(lang="en")
 head
 	meta(charset="UTF-8")
 	meta(http-equiv="X-UA-Compatible" content="IE=edge")
-	meta(name="viewport" content="width=device-width, initial-scale=1.0")
+	meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
+
 	link(rel="stylesheet" href="/style.css")
 	title= title
 body
@@ -26,15 +27,16 @@ body
 			aside#sidebar
 				nav#nav
 					ol
-						li(class="demo-link" data-demo-name="GEOMETRY_EXAMPLE") Geometry
+						li(class="demo-link active" data-demo-name="GEOMETRY_EXAMPLE") Geometry
 						li(class="demo-link" data-demo-name="DEPTHBUFFER_EXAMPLE") Depth Buffer
-						li(class="demo-link active" data-demo-name="SHADOWMAP_EXAMPLE") Shadow mapping
+						li(class="demo-link" data-demo-name="SHADOWMAP_EXAMPLE") Shadow mapping
 						li(class="demo-link" data-demo-name="ENVIRONMENTMAPPING_EXAMPLE") Environment mapping
 						li(class="demo-link" data-demo-name="PLASMA_EXAMPLE") Plasma
-						li(class="demo-link" data-demo-name="PHYSICS2D_EXAMPLE") 2D physics
+						li(class="demo-link" data-demo-name="TUNNEL_EXAMPLE") Tunnel
+						li(class="demo-link" data-demo-name="PHYSICS2D_EXAMPLE") 2D Physics
 	main#main
 		iframe#iframe(
-			src="/examples/SHADOWMAP_EXAMPLE"
+			src="/examples/GEOMETRY_EXAMPLE"
 		)
 	
 	script(src="/script.js")
