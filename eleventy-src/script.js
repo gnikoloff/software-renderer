@@ -1,4 +1,4 @@
-const PROJECT_NAME = "Software renderizer dojo"
+const PROJECT_NAME = "Software rasterizer dojo"
 
 let $containerWrapper;
 let $nav;
