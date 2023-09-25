@@ -22,6 +22,9 @@ static int vheight = 0;
 static int mask_right_border_x = 0;
 static float mask_border_velocity = 0.5;
 
+static float zoom_distance = 0;
+static float zoom_distance_end = 0;
+
 void depth_buffer_example_setup(void) {
 	vwidth = get_viewport_width();
 	vheight = get_viewport_height();
@@ -74,6 +77,34 @@ void depth_buffer_example_process_input(SDL_Event* event, int delta_time) {
 			persp_camera->distance += -event->wheel.preciseY * 0.01 * delta_time;
 			update_camera_on_drag(persp_camera, 0, 0);
 			break;
+		case SDL_FINGERDOWN: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance = sqrtf(dx * dx + dy * dy);
+			}
+		}
+		case SDL_FINGERMOTION: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance_end = sqrtf(dx * dx + dy * dy);
+				float dist = zoom_distance_end - zoom_distance;
+
+				persp_camera->distance += -dist * delta_time;
+				update_camera_on_drag(persp_camera, 0, 0);
+
+				zoom_distance = zoom_distance_end;
+			}
+
+			break;
+		}
 	}
 }
 

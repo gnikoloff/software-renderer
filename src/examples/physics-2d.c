@@ -11,7 +11,7 @@
 #include "physics-2d.h"
 
 #define PARTICLES_COUNT 1024
-#define LINES_COUNT 13
+#define LINES_COUNT 9
 #define GRAVITY 0.00005
 
 static particle_t particles[PARTICLES_COUNT];
@@ -112,7 +112,7 @@ void physics2D_example_setup(void) {
 	int vwidth = get_viewport_width();
 	int vheight = get_viewport_height();
 	for (int i = 0; i < PARTICLES_COUNT; i++) {
-		float screen_padding = rand() % 150;
+		float screen_padding = rand() % 150 + 50;
 		float x = rand() % vwidth;
 		float y = rand() % vheight - screen_padding;
 		particle_t particle = {

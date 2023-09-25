@@ -95,7 +95,7 @@ void update(void) {
 		SDL_Delay(time_to_wait);
 	}
 
-	delta_time = (SDL_GetTicks() - previous_frame_time);
+	delta_time = CLAMP(0, 500, (SDL_GetTicks() - previous_frame_time));
 	previous_frame_time = SDL_GetTicks();
 
 	// geometry_example_update(delta_time);
@@ -166,10 +166,22 @@ void onFrame(void) {
 	render();
 }
 
+#ifdef __EMSCRIPTEN__
+EM_JS(void, on_demo_ready, (), {
+	onDemoReady();
+});
+#endif
+
 int main(void) {
+	#ifdef ENVIRONMENTMAPPING_EXAMPLE
+		set_window_scale(0.6);
+	#endif
+
 	is_running = initialize_window();
 
 	setup();
+
+	on_demo_ready();
 
 	#ifdef __EMSCRIPTEN__
 		emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);

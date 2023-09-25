@@ -37,11 +37,6 @@ static vec3_t skybox_positions[BOX_SIDES] = {
 	{ .x = 0, .y = -9, .z = 0 },
 	{ .x = 0, .y = 0, .z = 9 },
 	{ .x = 0, .y = 0, .z = -9 }
-	// { .x = -9, .y = 0, .z = 0 },
-	// { .x = 0, .y = 9, .z = 0 },
-	// { .x = 0, .y = -9, .z = 0 },
-	// { .x = 0, .y = 0, .z = 9 },
-	// { .x = 0, .y = 0, .z = -9 }
 };
 static vec3_t skybox_rotations[BOX_SIDES] = {
 	{ .x = 0, .y = M_PI / 2, .z = 0 },
@@ -51,14 +46,6 @@ static vec3_t skybox_rotations[BOX_SIDES] = {
 	{ .x = 0, .y = 0, .z = 0 },
 	{ .x = 0, .y = M_PI, .z = 0 }
 };
-// static char* skybox_images[BOX_SIDES] = {
-// 	"./assets/gloomy_rt.png",
-// 	"./assets/gloomy_lf.png",
-// 	"./assets/gloomy_up.png",
-// 	"./assets/gloomy_dn.png",
-// 	"./assets/gloomy_ft.png",
-// 	"./assets/gloomy_bk.png"
-// };
 static char* skybox_images[BOX_SIDES] = {
 	"./assets/debug.png",
 	"./assets/debug.png",
@@ -70,6 +57,9 @@ static char* skybox_images[BOX_SIDES] = {
 
 static int vwidth = 0;
 static int vheight = 0;
+
+static float zoom_distance = 0;
+static float zoom_distance_end = 0;
 
 void environment_mapping_example_setup(void) {
 	vwidth = get_viewport_width();
@@ -127,6 +117,34 @@ void environment_mapping_example_process_input(SDL_Event* event, int delta_time)
 			persp_camera->distance += -event->wheel.preciseY * 0.01 * delta_time;
 			update_camera_on_drag(persp_camera, 0, 0);
 			break;
+		case SDL_FINGERDOWN: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance = sqrtf(dx * dx + dy * dy);
+			}
+		}
+		case SDL_FINGERMOTION: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance_end = sqrtf(dx * dx + dy * dy);
+				float dist = zoom_distance_end - zoom_distance;
+
+				persp_camera->distance += -dist * delta_time;
+				update_camera_on_drag(persp_camera, 0, 0);
+
+				zoom_distance = zoom_distance_end;
+			}
+
+			break;
+		}
 	}
 }
 

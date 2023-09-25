@@ -35,7 +35,7 @@ perspective_camera_t* make_perspective_camera(
 	camera->max_polar_angle = M_PI / 2;
 	camera->target = target;
 	camera->distance = vec3_length(position);
-	camera->min_distance = 0.1;
+	camera->min_distance = 4.0;
 	camera->max_distance = 25.0;
 
 	camera->projection_matrix = mat4_make_perspective(camera->fov, camera->aspect, camera->z_near, camera->z_far);

@@ -11,6 +11,8 @@ static SDL_Texture* color_buffer_texture = NULL;
 static int window_width = 0;
 static int window_height = 0;
 
+static float window_scale = 1;
+
 static color_framebuffer* color_buffer = NULL;
 static depth_framebuffer* z_buffer = NULL;
 
@@ -28,6 +30,10 @@ int get_viewport_width(void) {
 
 int get_viewport_height(void) {
 	return window_height;
+}
+
+void set_window_scale(float scale) {
+	window_scale = scale;
 }
 
 float get_depth_at(int x, int y) {
@@ -80,8 +86,8 @@ bool initialize_window(void) {
 		fullscreen_height = display_mode.h;
 	#endif
 
-	window_width = (int)(fullscreen_width) / 2;
-	window_height = (int)(fullscreen_height) / 2;
+	window_width = (int)(fullscreen_width) * window_scale;
+	window_height = (int)(fullscreen_height) * window_scale;
 	
 	window = SDL_CreateWindow(
 		NULL,
