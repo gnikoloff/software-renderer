@@ -5,8 +5,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Emscripten-Generated Code</title>
     <style>
+			body {
+				background-color: #111;
+			}
 			#canvas {
-				border: 0px none; background-color: black;
+				border: 0px none;
+				background-color: #111;
 				position: absolute;
 				top: 0px;
 				left: 0px;
@@ -66,6 +70,9 @@
           if (text) console.error('[post-exception status] ' + text);
         };
       };
+			window.onDemoReady = function() {
+				parent.postMessage("DEMO_INIT", "*");
+			}
     </script>
     {{{ SCRIPT }}}
   </body>

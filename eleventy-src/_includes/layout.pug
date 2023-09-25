@@ -8,23 +8,33 @@ head
 	title= title
 body
 
-	#intro
-		h1 Software renderer in C
-
+	#lds-dual-ring.visible
 	#container
-		aside#sidebar
-			nav#nav
-				ol
-					li(class="demo-link" data-demo-name="HELLO_TRIANGLE_EXAMPLE") Hello triangle
-					li(class="demo-link" data-demo-name="GEOMETRY_EXAMPLE") Geometry
-					li(class="demo-link" data-demo-name="sdfdsf") Environment mapping
-					li(class="demo-link" data-demo-name="SHADOWMAP_EXAMPLE") Shadow mapping
-					li(class="demo-link" data-demo-name="PHYSICS2D_EXAMPLE") 2D physics
-		main#main
-			iframe#iframe(
-				width="1024"
-				height="768"
-				src="/examples/SHADOWMAP_EXAMPLE"
-			)
+		button#mobile-info Close info
+		#container-wrapper.visible
+			#intro
+				h1#title Software Rasterizer Dojo
+				p#description
+					| 3D graphics written in C and compiled to WebAssembly.
+					br
+					br
+					| More info on&nbsp;
+					a(href="https://github.com/gnikoloff/software-renderer" target="_blank") Github
+					| . Made by 
+					a(href="https://georgi-nikolov.com" target="_blank") Georgi Nikolov
+					| .
+			aside#sidebar
+				nav#nav
+					ol
+						li(class="demo-link" data-demo-name="GEOMETRY_EXAMPLE") Geometry
+						li(class="demo-link" data-demo-name="DEPTHBUFFER_EXAMPLE") Depth Buffer
+						li(class="demo-link active" data-demo-name="SHADOWMAP_EXAMPLE") Shadow mapping
+						li(class="demo-link" data-demo-name="ENVIRONMENTMAPPING_EXAMPLE") Environment mapping
+						li(class="demo-link" data-demo-name="PLASMA_EXAMPLE") Plasma
+						li(class="demo-link" data-demo-name="PHYSICS2D_EXAMPLE") 2D physics
+	main#main
+		iframe#iframe(
+			src="/examples/SHADOWMAP_EXAMPLE"
+		)
 	
 	script(src="/script.js")
