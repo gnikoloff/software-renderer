@@ -1,6 +1,6 @@
 # Software rasterizer dojo
 
-3D renderer written in C as an exercise to learn how graphics APIs such as OpenGL are implemented under the hood.
+3D renderer written as an exercise to learn C and how graphics APIs such as OpenGL are implemented under the hood.
 
 ![Shadow mapping demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/shadow-mapping-demo.png?raw=true)
 
@@ -17,6 +17,12 @@
 9. Viewport clipping
 10. Loading and parsing Wavefront .OBJ files and PNG images
 11. Cube map sampling
+
+## References and readings
+1. [3D Computer Graphics Programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
+2. [Modern C](https://www.manning.com/books/modern-c)
+3. [niepp/spbr](https://github.com/niepp/srpbr)
+4. [Lode's Computer Graphics Tutorial](https://lodev.org/cgtutor/)
 
 ## Building for native
 
