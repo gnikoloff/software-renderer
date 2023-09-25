@@ -1,6 +1,6 @@
 # Software rasterizer dojo
 
-3D renderer written in C. I used this project to learn more about C and how graphics APIs such as OpenGL are implemented under the hood.
+3D renderer written in C as an exercise to learn C and how graphics APIs such as OpenGL are implemented under the hood.
 
 ![3D Geometry demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/geometry-demo.png?raw=true)
 
