@@ -12,11 +12,12 @@
 4. Uses [SDL](https://www.libsdl.org/) for access to graphics hardware, mouse, keyboard, etc.
 5. Supports native and web via [emscripten](https://emscripten.org/)
 6. Perspective correct interpolation
-7. Depth buffer
-8. Face culling
-9. Viewport clipping
-10. Loading and parsing Wavefront .OBJ files and PNG images
-11. Cube map sampling
+7. Support for vertex and fragment shaders
+8. Depth buffer
+9. Face culling
+10. Viewport clipping
+11. Loading and parsing Wavefront .OBJ files and PNG images
+12. Cube map sampling
 
 ## References and readings
 1. [3D Computer Graphics Programming](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
