@@ -41,7 +41,7 @@ void depth_buffer_example_setup(void) {
 	float z_near = 1.0;
 	float z_far = 30.0;
 
-	vec3_t persp_cam_position = { .x = 2, .y = 1.4, .z = -2 };
+	vec3_t persp_cam_position = { .x = 0, .y = 0, .z = -4 };
 	vec3_t persp_cam_target = { .x = 0, .y = 0, .z = 0 };
 	persp_camera = make_perspective_camera(
 		fovy,
@@ -49,7 +49,8 @@ void depth_buffer_example_setup(void) {
 		z_near,
 		z_far,
 		persp_cam_position,
-		persp_cam_target
+		persp_cam_target,
+		1
 	);
 	
 	init_frustum_planes(fovx, fovy, z_near, z_far);

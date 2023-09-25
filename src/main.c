@@ -16,7 +16,9 @@
 #include "clipping.h"
 #include "geometry.h"
 
-// #include "examples/geometry-demo.h"
+#ifdef GEOMETRY_EXAMPLE
+#include "examples/geometry-demo.h"
+#endif
 
 #ifdef SHADOWMAP_EXAMPLE
 #include "examples/shadow-map-demo.h"
@@ -38,13 +40,19 @@
 #include "examples/plasma-demo.h"
 #endif
 
+#ifdef TUNNEL_EXAMPLE
+#include "examples/tunnel-demo.h"
+#endif
+
 bool is_running = false;
 int previous_frame_time = 0;
 int delta_time = 0;
 
 void setup(void) {
 	srand(time(NULL));
-	// geometry_example_setup();
+	#ifdef GEOMETRY_EXAMPLE
+		geometry_example_setup();
+	#endif
 	#ifdef SHADOWMAP_EXAMPLE
 		shadow_map_example_setup();
 	#endif
@@ -60,6 +68,9 @@ void setup(void) {
 	#ifdef PLASMA_EXAMPLE
 		plasma_demo_setup();
 	#endif
+	#ifdef TUNNEL_EXAMPLE
+		tunnel_demo_setup();
+	#endif
 }
 
 void process_input(void) {
@@ -69,7 +80,9 @@ void process_input(void) {
 			is_running = false;
 			return;
 		}
-		// geometry_example_process_input(&event, delta_time);
+		#ifdef GEOMETRY_EXAMPLE
+			geometry_example_process_input(&event, delta_time);
+		#endif
 		#ifdef SHADOWMAP_EXAMPLE
 			shadow_map_example_process_input(&event, delta_time);
 		#endif
@@ -85,6 +98,9 @@ void process_input(void) {
 		#ifdef PLASMA_EXAMPLE
 			plasma_demo_process_input(&event, delta_time);
 		#endif
+		#ifdef TUNNEL_EXAMPLE
+			tunnel_demo_process_input(&event, delta_time);
+		#endif
 	}
 }
 
@@ -98,7 +114,9 @@ void update(void) {
 	delta_time = CLAMP(0, 500, (SDL_GetTicks() - previous_frame_time));
 	previous_frame_time = SDL_GetTicks();
 
-	// geometry_example_update(delta_time);
+	#ifdef GEOMETRY_EXAMPLE
+		geometry_example_update(delta_time, now);
+	#endif
 	#ifdef SHADOWMAP_EXAMPLE
 		shadow_map_example_update(delta_time, now);
 	#endif
@@ -114,13 +132,18 @@ void update(void) {
 	#ifdef PLASMA_EXAMPLE
 		plasma_demo_update(delta_time, now);
 	#endif
+	#ifdef TUNNEL_EXAMPLE
+		tunnel_demo_update(delta_time, now);
+	#endif
 }
 
 void render(void) {
 	int now = SDL_GetTicks();
 	clear_color(0xFF111111);
 	clear_depth();
-	// geometry_example_render(delta_time);
+	#ifdef GEOMETRY_EXAMPLE
+		geometry_example_render(delta_time, now);
+	#endif
 	#ifdef SHADOWMAP_EXAMPLE
 		shadow_map_example_render(delta_time, now);
 	#endif
@@ -136,11 +159,16 @@ void render(void) {
 	#ifdef PLASMA_EXAMPLE
 		plasma_demo_render(delta_time, now);
 	#endif
+	#ifdef TUNNEL_EXAMPLE
+		tunnel_demo_render(delta_time, now);
+	#endif
 	render_color_buffer();
 }
 
 void free_resources(void) {
-	// geometry_example_free_resources();
+	#ifdef GEOMETRY_EXAMPLE
+		geometry_example_free_resources();
+	#endif
 	#ifdef SHADOWMAP_EXAMPLE
 		shadow_map_example_free_resources();
 	#endif
@@ -155,6 +183,9 @@ void free_resources(void) {
 	#endif
 	#ifdef PLASMA_EXAMPLE
 		plasma_demo_free_resources();
+	#endif
+	#ifdef TUNNEL_EXAMPLE
+		tunnel_demo_free_resources();
 	#endif
 	
 	destroy_window();
@@ -174,14 +205,16 @@ EM_JS(void, on_demo_ready, (), {
 
 int main(void) {
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
-		set_window_scale(0.6);
+		set_window_scale(0.5);
 	#endif
 
 	is_running = initialize_window();
 
 	setup();
 
-	on_demo_ready();
+	#ifdef __EMSCRIPTEN__
+		on_demo_ready();
+	#endif
 
 	#ifdef __EMSCRIPTEN__
 		emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);

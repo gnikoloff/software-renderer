@@ -21,5 +21,6 @@ mat4_t mat4_look_at(vec3_t eye, vec3_t target, vec3_t up);
 mat4_t mat4_make_rotation_yxz(float y, float x, float z);
 vec4_t mat4_mul_vec4_project(mat4_t mat_proj, vec4_t v);
 mat4_t mat4_inverse(mat4_t m);
+mat4_t mat4_transpose(mat4_t m);
 
 #endif

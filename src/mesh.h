@@ -22,6 +22,7 @@ typedef struct {
 	mat4_t translation_matrix;
 	mat4_t rotation_matrix;
 	mat4_t world_matrix;
+	mat4_t normal_matrix;
 	
 	quat_t quaternion;
 

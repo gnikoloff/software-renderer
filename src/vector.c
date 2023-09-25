@@ -4,20 +4,14 @@
 // static const float cEpslion = 1e-6f;
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-float Q_rsqrt(float number) {
-	long i;
-	float x2, y;
-	const float threehalfs = 1.5F;
-
-	x2 = number * 0.5F;
-	y  = number;
-	i  = * ( long * ) &y;                       // evil floating point bit level hacking
-	i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
-	y  = * ( float * ) &i;
-	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-	// y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-
-	return y;
+float InvSqrt(float x)
+{
+    float xhalf = 0.5f * x;
+    int i = *(int*)&x;              // get bits for floating value
+    i = 0x5f375a86 - (i >> 1);      // gives initial guess y0
+    x = *(float*)&i;                // convert bits back to float
+    x = x * (1.5f - xhalf * x * x); // Newton step, repeating increases accuracy
+    return x;
 }
 
 inline vec2_t vec2_new(float x, float y) {
@@ -68,13 +62,9 @@ inline float vec2_dot(vec2_t a, vec2_t b) {
 }
 
 inline void vec2_normalize(vec2_t* v) {
-	float len = vec2_length(*v);
-	// float inv = cEpslion;
-	// if (abs(len) > cEpslion) {
-	// 	inv = 1.0f / len;
-	// }
-	v->x /= len;
-	v->y /= len;
+	float inv_sqrt = InvSqrt(v->x * v->x + v->y * v->y);
+	v->x *= inv_sqrt;
+	v->y *= inv_sqrt;
 }
 
 inline vec3_t vec3_new(float x, float y, float z) {
@@ -168,14 +158,10 @@ inline float vec3_dot(vec3_t a, vec3_t b) {
 }
 
 inline void vec3_normalize(vec3_t* v) {
-	float len = vec3_length(*v);
-	// float inv = cEpslion;
-	// if (abs(len) > cEpslion) {
-	// 	inv = 1.0f / len;
-	// }
-	v->x /= len;
-	v->y /= len;
-	v->z /= len;
+	float inv_sqrt = InvSqrt(v->x * v->x + v->y * v->y + v->z * v->z);
+	v->x *= inv_sqrt;
+	v->y *= inv_sqrt;
+	v->z *= inv_sqrt;
 }
 
 inline vec3_t vec3_rotate_x(vec3_t v, float angle) {

@@ -22,6 +22,9 @@ static mesh_t* ring = NULL;
 static mesh_t* torus = NULL;
 static mesh_t* efa = NULL;
 
+static float zoom_distance = 0;
+static float zoom_distance_end = 0;
+
 void geometry_example_setup(void) {
 	float aspectx = (float)get_viewport_width() / (float)get_viewport_height();
 	float aspecty = (float)get_viewport_height() / (float)get_viewport_width();
@@ -30,9 +33,9 @@ void geometry_example_setup(void) {
 	float z_near = 1.0;
 	float z_far = 100.0;
 
-	vec3_t cam_position = { .x = 4, .y = 5, .z = -7 };
+	vec3_t cam_position = { .x = 0, .y = 0, .z = -10 };
 	vec3_t cam_target = { .x = 0, .y = 0, .z = 0 };
-	camera = make_perspective_camera(fovy, aspecty, z_near, z_far, cam_position, cam_target);
+	camera = make_perspective_camera(fovy, aspecty, z_near, z_far, cam_position, cam_target, 4);
 	
 	init_frustum_planes(fovx, fovy, z_near, z_far);
 
@@ -88,10 +91,39 @@ void geometry_example_process_input(SDL_Event* event, int delta_time) {
 			camera->distance += -event->wheel.preciseY * 0.01 * delta_time;
 			update_camera_on_drag(camera, 0, 0);
 			break;
+		case SDL_FINGERDOWN: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance = sqrtf(dx * dx + dy * dy);
+			}
+		}
+		case SDL_FINGERMOTION: {
+			SDL_Finger *finger_0 = SDL_GetTouchFinger(event->tfinger.touchId, 0);
+			SDL_Finger *finger_1 = SDL_GetTouchFinger(event->tfinger.touchId, 1);
+
+			if (finger_0 != NULL && finger_1 != NULL) {
+				float dx = finger_1->x - finger_0->x;
+				float dy = finger_1->y - finger_0->y;
+				zoom_distance_end = sqrtf(dx * dx + dy * dy);
+				float dist = zoom_distance_end - zoom_distance;
+
+				camera->distance += -dist * delta_time;
+				update_camera_on_drag(camera, 0, 0);
+
+				zoom_distance = zoom_distance_end;
+			}
+
+			break;
+		}
 	}
 }
 
-void geometry_example_update(int delta_time) {
+
+void geometry_example_update(int delta_time, int elapsed_time) {
 	float delta_multiplier = 0.00075;
 	box->rotation.x += delta_time * delta_multiplier;
 	box->rotation.y += delta_time * delta_multiplier;
@@ -105,10 +137,51 @@ void geometry_example_update(int delta_time) {
 	efa->rotation.y += delta_time * delta_multiplier;
 }
 
-void geometry_example_render(int delta_time) {
+static void main_vertex_shader(
+	int camera_type,
+	void* camera,
+	mesh_t* mesh,
+	vertex_t* vertex
+) {
+	float half_viewport_width = get_viewport_width() / 2;
+	float half_viewport_height = get_viewport_height() / 2;
+
+	vertex->position.x *= half_viewport_width;
+	vertex->position.y *= half_viewport_height;
+	vertex->position.y *= -1;
+	
+	vertex->position.x += half_viewport_width;
+	vertex->position.y += half_viewport_height;
+}
+
+static fragment_shader_result_t main_fragment_shader(
+	int camera_type,
+	void* camera,
+	mesh_t* mesh,
+	void* fs_inputs
+) {
+	fragment_shader_triangle_inputs* inputs = (fragment_shader_triangle_inputs*)fs_inputs;
+	fragment_shader_result_t fs_out = {
+		.color_buffer = get_screen_color_buffer(),
+		.depth_buffer = get_screen_depth_buffer(),
+		.depth = inputs->interpolated_w,
+		.color = sample_texture(mesh->texture, inputs->u, inputs->v)
+	};
+	return fs_out;
+}
+
+void geometry_example_render(int delta_time, int elapsed_time) {
 	for (int mesh_index = 0; mesh_index < get_meshes_count(); mesh_index++) {
 		mesh_t* mesh = get_mesh(mesh_index);
-		
+		pipeline_draw(
+			PERSPECTIVE_CAMERA,
+			camera,
+			mesh,
+			CULL_BACKFACE,
+			RENDER_TRIANGLE,
+			main_vertex_shader,
+			main_fragment_shader
+		);
 	}
 }
 

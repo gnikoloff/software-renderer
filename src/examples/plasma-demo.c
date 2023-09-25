@@ -19,8 +19,8 @@
 
 static perspective_camera_t* persp_camera = NULL;
 static mesh_t* mesh = NULL;
-uint32_t plasma[PLASMA_BUFFER_SIZE][PLASMA_BUFFER_SIZE];
-uint32_t palette[256];
+static uint32_t plasma[PLASMA_BUFFER_SIZE][PLASMA_BUFFER_SIZE];
+static uint32_t palette[256];
 
 static int vwidth = 0;
 static int vheight = 0;
@@ -43,7 +43,7 @@ void plasma_demo_setup(void) {
 	float z_near = 1.0;
 	float z_far = 30.0;
 
-	vec3_t persp_cam_position = { .x = 2, .y = 1.4, .z = -2 };
+	vec3_t persp_cam_position = { .x = 0, .y = 0, .z = -6 };
 	vec3_t persp_cam_target = { .x = 0, .y = 0, .z = 0 };
 	persp_camera = make_perspective_camera(
 		fovy,
@@ -51,12 +51,13 @@ void plasma_demo_setup(void) {
 		z_near,
 		z_far,
 		persp_cam_position,
-		persp_cam_target
+		persp_cam_target,
+		4
 	);
 	
 	init_frustum_planes(fovx, fovy, z_near, z_far);
 
-	mesh = make_plane(2, 2, 1, 1);
+	mesh = make_box(2, 2, 2, 1, 1, 1);
 
 	for(int y = 0; y < PLASMA_BUFFER_SIZE; y++) {
   	for(int x = 0; x < PLASMA_BUFFER_SIZE; x++) {
@@ -73,10 +74,6 @@ void plasma_demo_setup(void) {
 
 	color_rgb_t color_rgb;
   for(int x = 0; x < 256; x++) {
-    //use HSVtoRGB to vary the Hue of the color through the palette
-    // color_rgb = hsv_to_rgb(x, 255, 255);
-    // palette[x] = rgb_to_uint32(&color_rgb);
-
 		color_rgb.r = 128.0 + 128 * sin(3.1415 * x / 32.0);
 		color_rgb.g = 128.0 + 128 * sin(3.1415 * x / 64.0);
 		color_rgb.b = 128.0 + 128 * sin(3.1415 * x / 128.0);
@@ -128,9 +125,9 @@ void plasma_demo_process_input(SDL_Event* event, int delta_time) {
 
 void plasma_demo_update(int delta_time, int elapsed_time) {
 	paletteShift = elapsed_time / 10.0;
-	// mesh->rotation.x += delta_time * 0.00075;
-	// mesh->rotation.y += delta_time * 0.00075;
-	// mesh->rotation.z += delta_time * 0.00075;
+	mesh->rotation.x += delta_time * 0.00075;
+	mesh->rotation.y += delta_time * 0.00075;
+	mesh->rotation.z += delta_time * 0.00075;
 }
 
 static void vertex_shader(

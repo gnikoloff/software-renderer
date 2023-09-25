@@ -88,12 +88,12 @@ void bounce_particle_off_line(line_t* line) {
 
 			float y1 = c * y - s * x;
 
-			if (y1 > -particle->radius && y1 < vy1) {
+			if ((y1 > -particle->radius * 2) && y1 < vy1) {
 				float x2 = c * x + s * y;
 				float vx1 = c * particle->vx + s * particle->vy;
 				vy1 *= -0.4;
 
-				y1 = -particle->radius;
+				y1 = -particle->radius * 2;
 
 				x = c * x2 - s * y1;
 				y = c * y1 + s * x2;
@@ -134,19 +134,20 @@ void physics2D_example_setup(void) {
 	float step = M_PI / (LINES_COUNT - 3);
 
 	for (int i = 0; i < LINES_COUNT; i++) {
-		float x0 = cos(i * 2 * step) * vwidth * 0.35 + vwidthf / 2 - vwidthf * 0.1;
+		float offset_x = i % 2 == 0 ? -vwidth / 5 : vwidth / 5;
+		float x0 = cos(i * 2 * step) * vwidth * 0.05 + vwidthf / 2 + offset_x - vwidthf * 0.1;
 		float y0 = step_y * i + (i % 2 == 0 ? -10 : 10);
-		float x1 = cos(i * 2 * step) * vwidth * 0.35 + vwidthf / 2 + vwidthf * 0.1;
+		float x1 = cos(i * 2 * step) * vwidth * 0.05 + vwidthf / 2 + offset_x + vwidthf * 0.1;
 		float y1 = step_y * i + (i % 2 == 0 ? 10 : -10);
 		if (i == LINES_COUNT - 3) {
-			x0 = 0;
+			x0 = -50;
 			y0 = vheightf * 0.825;
 			x1 = vwidth * 0.15;
 			y1 = y0 + 100;
 		} else if (i == LINES_COUNT - 2) {
 			x0 = vwidthf * 0.85;
 			y0 = y0 + 100;
-			x1 = vwidthf;
+			x1 = vwidthf + 50;
 			y1 = vheightf * 0.825;
 		} else if (i == LINES_COUNT - 1) {
 			x0 = vwidthf * 0.425;
@@ -184,6 +185,7 @@ void physics2D_example_update(int delta_time, int elapsed_time) {
 
 		if (particle->y > vheight + particle->screen_padding) {
 			particle->y = -(rand() % (int)particle->screen_padding);
+			particle->vy = 0.2;
 		}
 	}
 

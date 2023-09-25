@@ -208,3 +208,28 @@ mat4_t mat4_inverse(mat4_t m) {
 
 	return out;
 }
+
+inline mat4_t mat4_transpose(mat4_t m) {
+	mat4_t out = {{{ 0 }}};
+	out.m[0][0] = m.m[0][0];
+	out.m[0][1] = m.m[1][0];
+	out.m[0][2] = m.m[2][0];
+	out.m[0][3] = m.m[3][0];
+
+	out.m[1][0] = m.m[0][1];
+	out.m[1][1] = m.m[1][1];
+	out.m[1][2] = m.m[2][1];
+	out.m[1][3] = m.m[3][1];
+
+	out.m[2][0] = m.m[0][2];
+	out.m[2][1] = m.m[1][2];
+	out.m[2][2] = m.m[2][2];
+	out.m[2][3] = m.m[3][2];
+
+	out.m[3][0] = m.m[0][3];
+	out.m[3][1] = m.m[1][3];
+	out.m[3][2] = m.m[2][3];
+	out.m[3][3] = m.m[3][3];
+
+	return out;
+}

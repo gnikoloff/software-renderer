@@ -332,6 +332,8 @@ void make_ring_geometry(
 			array_push(mesh->vertices, vertex);
 			vertices_count++;
 
+			array_push(mesh->normals, vec3_new(0, 0, 1));
+
 			uv.u = (vertex.x / outer_radius + 1) / 2;
 			uv.v = (vertex.y / outer_radius + 1) / 2;
 			array_push(texcoords, uv);
@@ -388,6 +390,7 @@ void make_torus_geometry(
 	tex2_t *texcoords = NULL;
 
 	vec3_t vertex;
+	vec3_t normal;
 	tex2_t uv;
 
 	int vertices_count = 0;
@@ -403,6 +406,14 @@ void make_torus_geometry(
 
 			array_push(mesh->vertices, vertex);
 			vertices_count++;
+
+			float center_x = cos(u) * radius;
+			float center_y = sin(u) * radius;
+
+			normal.x = vertex.x - center_x;
+			normal.y = vertex.y - center_y;
+			normal.z = vertex.z;
+			array_push(mesh->normals, normal);
 
 			uv.u = 1 - i / (float)tubular_segments;
 			uv.v = j / (float)radial_segments;

@@ -57,7 +57,8 @@ perspective_camera_t* make_perspective_camera(
 	float z_near,
 	float z_far,
 	vec3_t position,
-	vec3_t target
+	vec3_t target,
+	float min_distance
 );
 orthographic_camera_t* make_orthographic_camera(
 	float left,

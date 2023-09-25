@@ -19,7 +19,8 @@ perspective_camera_t* make_perspective_camera(
 	float z_near,
 	float z_far,
 	vec3_t position,
-	vec3_t target
+	vec3_t target,
+	float min_distance
 ) {
 	printf("Create camera %d\n", perspective_camera_count);
 	assert(perspective_camera_count < MAX_NUM_PERSP_CAMERAS);
@@ -35,7 +36,7 @@ perspective_camera_t* make_perspective_camera(
 	camera->max_polar_angle = M_PI / 2;
 	camera->target = target;
 	camera->distance = vec3_length(position);
-	camera->min_distance = 4.0;
+	camera->min_distance = min_distance;
 	camera->max_distance = 25.0;
 
 	camera->projection_matrix = mat4_make_perspective(camera->fov, camera->aspect, camera->z_near, camera->z_far);

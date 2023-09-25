@@ -10,48 +10,32 @@
 #include "../clipping.h"
 #include "../geometry.h"
 #include "../triangle.h"
+#include "../color.h"
 #include "../pipeline.h"
 
-#include "depth-buffer-demo.h"
+#include "plasma-demo.h"
 
-#define BOX_SIDES 6
+#define TUNNEL_TEXTURE_SIZE 128
+#define TUNNEL_TEXTURE_SIZE_X2 256
+#define TUNNEL_BUFFER_SIZE 128
 
-static texture_cube_t cube_texture;
 static perspective_camera_t* persp_camera = NULL;
-static mesh_t* sphere = NULL;
-static mesh_t* skybox_sides[BOX_SIDES];
-static vec3_t skybox_positions[BOX_SIDES] = {
-	{ .x = 9, .y = 0, .z = 0 },
-	{ .x = -9, .y = 0, .z = 0 },
-	{ .x = 0, .y = 9, .z = 0 },
-	{ .x = 0, .y = -9, .z = 0 },
-	{ .x = 0, .y = 0, .z = 9 },
-	{ .x = 0, .y = 0, .z = -9 }
-};
-static vec3_t skybox_rotations[BOX_SIDES] = {
-	{ .x = 0, .y = M_PI / 2, .z = 0 },
-	{ .x = 0, .y = -M_PI / 2, .z = 0 },
-	{ .x = -M_PI / 2, .y = 0, .z = 0 },
-	{ .x = M_PI / 2, .y = 0, .z = 0 },
-	{ .x = 0, .y = 0, .z = 0 },
-	{ .x = 0, .y = M_PI, .z = 0 }
-};
-static char* skybox_images[BOX_SIDES] = {
-	"./assets/debug.png",
-	"./assets/debug.png",
-	"./assets/debug.png",
-	"./assets/debug.png",
-	"./assets/debug.png",
-	"./assets/debug.png"
-};
+static mesh_t* mesh = NULL;
+static uint32_t tunnel_texture[TUNNEL_TEXTURE_SIZE][TUNNEL_TEXTURE_SIZE];
+static uint32_t distance_table[TUNNEL_TEXTURE_SIZE_X2][TUNNEL_TEXTURE_SIZE_X2];
+static uint32_t angle_table[TUNNEL_TEXTURE_SIZE_X2][TUNNEL_TEXTURE_SIZE_X2];
 
 static int vwidth = 0;
 static int vheight = 0;
+static int shift_x = 0;
+static int shift_y = 0;
+static int shift_look_x = 0;
+static int shift_look_y = 0;
 
 static float zoom_distance = 0;
 static float zoom_distance_end = 0;
 
-void environment_mapping_example_setup(void) {
+void tunnel_demo_setup(void) {
 	vwidth = get_viewport_width();
 	vheight = get_viewport_height();
 
@@ -65,7 +49,7 @@ void environment_mapping_example_setup(void) {
 	float z_near = 1.0;
 	float z_far = 30.0;
 
-	vec3_t persp_cam_position = { .x = 0, .y = 0, .z = -3 };
+	vec3_t persp_cam_position = { .x = 0, .y = 0, .z = -6 };
 	vec3_t persp_cam_target = { .x = 0, .y = 0, .z = 0 };
 	persp_camera = make_perspective_camera(
 		fovy,
@@ -74,24 +58,35 @@ void environment_mapping_example_setup(void) {
 		z_far,
 		persp_cam_position,
 		persp_cam_target,
-		2.0
+		4
 	);
 	
 	init_frustum_planes(fovx, fovy, z_near, z_far);
 
-	sphere = make_sphere(1, 20, 20, 0, M_PI * 2, 0, M_PI);
+	mesh = make_box(2, 2, 2, 1, 1, 1);
 
-	cube_texture = make_cube_texture(skybox_images);
+	for(int y = 0; y < TUNNEL_TEXTURE_SIZE; y++) {
+  	for(int x = 0; x < TUNNEL_TEXTURE_SIZE; x++) {
+			tunnel_texture[y][x] = (uint32_t)(x * 256 / TUNNEL_TEXTURE_SIZE) ^ (y * 256 / TUNNEL_TEXTURE_SIZE);
+		}
+	}
 
-	for (int i = 0; i < BOX_SIDES; i++) {
-		skybox_sides[i] = make_plane(18, 18, 1, 1);
-		skybox_sides[i]->rotation = skybox_rotations[i];
-		skybox_sides[i]->translation = skybox_positions[i];
-		skybox_sides[i]->texture = &cube_texture.face_textures[i];
+	 //generate non-linear transformation table
+  for (int y = 0; y < TUNNEL_TEXTURE_SIZE_X2; y++) {
+		for (int x = 0; x < TUNNEL_TEXTURE_SIZE_X2; x++) {
+			int angle, distance;
+			float ratio = 32.0;
+			int w = TUNNEL_BUFFER_SIZE;
+			int h = TUNNEL_BUFFER_SIZE;
+			distance = (int)(ratio * TUNNEL_TEXTURE_SIZE / sqrt((float)((x - w) * (x - w) + (y - h) * (y - h)))) % TUNNEL_TEXTURE_SIZE;
+    	angle = (int)(0.5 * TUNNEL_TEXTURE_SIZE * atan2((float)(y - h), (float)(x - w)) / 3.1416);
+			distance_table[y][x] = distance;
+			angle_table[y][x] = angle;
+		}
 	}
 }
 
-void environment_mapping_example_process_input(SDL_Event* event, int delta_time) {
+void tunnel_demo_process_input(SDL_Event* event, int delta_time) {
 	switch (event->type) {
 		case SDL_MOUSEMOTION:
 			if (event->motion.state & SDL_BUTTON_LMASK) {
@@ -133,11 +128,20 @@ void environment_mapping_example_process_input(SDL_Event* event, int delta_time)
 	}
 }
 
-void environment_mapping_example_update(int delta_time, int elapsed_time) {
-	// ...
+void tunnel_demo_update(int delta_time, int elapsed_time) {
+	float animation = elapsed_time * 0.001;
+	shift_x = (int)(TUNNEL_TEXTURE_SIZE * 1.0 * animation);
+	shift_y = (int)(TUNNEL_TEXTURE_SIZE * 0.25 * animation);
+
+	shift_look_x = TUNNEL_TEXTURE_SIZE / 2 + (int)(TUNNEL_TEXTURE_SIZE / 3 * sin(animation));
+	shift_look_y = TUNNEL_TEXTURE_SIZE / 2 + (int)(TUNNEL_TEXTURE_SIZE / 3 * sin(animation * 2.0));
+
+	mesh->rotation.x += delta_time * 0.00075;
+	mesh->rotation.y += delta_time * 0.00075;
+	mesh->rotation.z += delta_time * 0.00075;
 }
 
-static void main_vertex_shader(
+static void vertex_shader(
 	int camera_type,
 	void* camera,
 	mesh_t* mesh,
@@ -161,67 +165,37 @@ static fragment_shader_result_t fragment_shader(
 	void* fs_inputs
 ) {
 	fragment_shader_triangle_inputs* inputs = (fragment_shader_triangle_inputs*)fs_inputs;
-	
-	fragment_shader_result_t fs_out = {
-		.color_buffer = get_screen_color_buffer(),
-		.depth_buffer = get_screen_depth_buffer(),
-		.depth = inputs->interpolated_w,
-		.color = mesh->texture == NULL ? 0xff0000ff : sample_texture(mesh->texture, inputs->u, inputs->v)
-	};
-	return fs_out;
-}
+	int x = (int)(fabs(inputs->u * TUNNEL_TEXTURE_SIZE)) % TUNNEL_TEXTURE_SIZE;
+	int y = (int)(fabs(inputs->v * TUNNEL_TEXTURE_SIZE)) % TUNNEL_TEXTURE_SIZE;
 
-static fragment_shader_result_t fragment_shader_sphere(
-	int camera_type,
-	void* camera,
-	mesh_t* mesh,
-	void* fs_inputs
-) {
-	fragment_shader_triangle_inputs* inputs = (fragment_shader_triangle_inputs*)fs_inputs;
-	vec3_t normal = vec3_new(inputs->interpolated_normal_x, inputs->interpolated_normal_y, inputs->interpolated_normal_z);
-	vec3_normalize(&normal);
-
-	perspective_camera_t* persp_camera = (perspective_camera_t*)camera;
-
-	vec3_t eye_to_surface_dir = vec3_sub(mesh->translation, persp_camera->position);
-	vec3_t direction = vec3_reflect(eye_to_surface_dir, normal);
+	// uint32_t color = tunnel_texture[(uint)(distance_table[y][x] + shift_x) % TUNNEL_TEXTURE_SIZE][(uint)(angle_table[y][x] + shift_y) % TUNNEL_TEXTURE_SIZE];
+	uint32_t color = tunnel_texture[
+		(unsigned int)(distance_table[x + shift_look_x][y + shift_look_y] + shift_x) % TUNNEL_TEXTURE_SIZE
+	][
+		(unsigned int)(angle_table[x + shift_look_x][y + shift_look_y]+ shift_y) % TUNNEL_TEXTURE_SIZE
+	];
 
 	fragment_shader_result_t fs_out = {
 		.color_buffer = get_screen_color_buffer(),
 		.depth_buffer = get_screen_depth_buffer(),
 		.depth = inputs->interpolated_w,
-		.color = sample_cube_texture(&cube_texture, direction)
+		.color = color
 	};
 	return fs_out;
 }
 
-void environment_mapping_example_render(int delta_time, int elapsed_time) {
-	
+void tunnel_demo_render(int delta_time, int elapsed_time) {
 	pipeline_draw(
 		PERSPECTIVE_CAMERA,
 		persp_camera,
-		sphere,
-		CULL_BACKFACE,
+		mesh,
+		CULL_NONE,
 		RENDER_TRIANGLE,
-		main_vertex_shader,
-		fragment_shader_sphere
+		vertex_shader,
+		fragment_shader
 	);
-
-	
-	for (int i = 0; i < BOX_SIDES; i++) {
-		mesh_t* skybox_side = skybox_sides[i];
-		pipeline_draw(
-			PERSPECTIVE_CAMERA,
-			persp_camera,
-			skybox_side,
-			CULL_BACKFACE,
-			RENDER_TRIANGLE,
-			main_vertex_shader,
-			fragment_shader
-		);
-	}
 }
 
-void environment_mapping_example_free_resources(void) {
+void tunnel_demo_free_resources(void) {
 	dispose_meshes();
 }

@@ -45,7 +45,7 @@ void shadow_map_example_setup(void) {
 	float z_near = 1.0;
 	float z_far = 30.0;
 
-	vec3_t persp_cam_position = { .x = 4, .y = 5, .z = -7 };
+	vec3_t persp_cam_position = { .x = 0, .y = 1, .z = -7 };
 	vec3_t persp_cam_target = { .x = 0, .y = 0, .z = 0 };
 	persp_camera = make_perspective_camera(
 		fovy,
@@ -53,7 +53,8 @@ void shadow_map_example_setup(void) {
 		z_near,
 		z_far,
 		persp_cam_position,
-		persp_cam_target
+		persp_cam_target,
+		8
 	);
 
 	vec3_t ortho_cam_position = { .x = 0, .y = 10, .z = 1.1 };
@@ -85,7 +86,7 @@ void shadow_map_example_setup(void) {
 	efa->scale.z = 0.5;
 	efa->translation.y = 2.0;
 
-	plane = make_plane(5, 5, 10, 10);
+	plane = make_plane(5, 5, 5, 5);
 	plane->rotation.x = M_PI / 2;
 
 	timer_elapsed_time = time(NULL);

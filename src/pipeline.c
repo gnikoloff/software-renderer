@@ -309,24 +309,40 @@ void render_line(
 	mesh_t* mesh,
 	fragment_shader_callback fs_shader
 ) {
-	int delta_x = x1 - x0;
-	int delta_y = y1 - y0;
+	bool steep = false;
 
-	int longest_side_length = abs(delta_x) >= abs(delta_y) ? abs(delta_x) : abs(delta_y);
+	if (abs(x0 - x1) < abs(y0 - y1)) {
+		int_swap(&x0, &y0);
+		int_swap(&x1, &y1);
+		steep = true;
+	}
 
-	float x_inc = delta_x / (float)longest_side_length;
-	float y_inc = delta_y / (float)longest_side_length;
+	if (x0 > x1) {
+		int_swap(&x0, &x1);
+		int_swap(&y0, &y1);
+	}
 
-	float current_x = x0;
-	float current_y = y0;
+	int dx = x1 - x0;
+	int dy = y1 - y0; 
+	int derror2 = abs(dy)*2; 
+	int error2 = 0; 
+	int y = y0; 
 
-	for (int i = 0; i <= longest_side_length; i++) {
-		int x = round(current_x);
-		int y = round(current_y);
+	for (int x = x0; x <= x1; x++) {
+		int current_x;
+		int current_y;
+		if (steep) {
+			current_x = y;
+			current_y = x;
+		} else { 
+			current_x = x;
+			current_y = y;
+		}
+
 
 		fragment_shader_line_inputs fs_inputs = {
-			.x = x,
-			.y = y
+			.x = current_x,
+			.y = current_y
 		};
 
 		fragment_shader_result_t fs_out = fs_shader(
@@ -337,14 +353,18 @@ void render_line(
 		);
 
 		if (fs_out.color_buffer != NULL) {
-			update_color_buffer_at(fs_out.color_buffer, x, y, fs_out.color);
+			update_color_buffer_at(fs_out.color_buffer, current_x, current_y, fs_out.color);
 		}
 		if (fs_out.depth_buffer != NULL) {
-			update_depth_buffer_at(fs_out.depth_buffer, x, y, fs_out.depth);
+			update_depth_buffer_at(fs_out.depth_buffer, current_x, current_y, fs_out.depth);
 		}
-		current_x += x_inc;
-		current_y += y_inc;
-	}
+
+		error2 += derror2; 
+		if (error2 > dx) { 
+			y += (y1 > y0 ? 1: -1); 
+			error2 -= dx * 2; 
+		}
+	} 
 }
 
 void draw_rect(
@@ -505,7 +525,10 @@ void pipeline_draw(
 
 		for (int j = 0; j < 3; j++) {
 			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
+			// vec4_t transformed_normal = vec4_from_vec3(face_normals[j]);
+
 			vec4_t world_space_vertex = mat4_mul_vec4(mesh->world_matrix, transformed_vertex);
+			// vec4_t world_space_normal = mat4_mul_vec4(mesh->normal_matrix, transformed_normal);
 			transformed_vertices[j] = world_space_vertex;
 			varying_world_vertices[j].position = world_space_vertex;
 			varying_world_vertices[j].normal = face_normals[j];
