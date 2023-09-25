@@ -56,7 +56,7 @@ function onNavClick(e) {
 		const title = e.target.textContent.trim();
 		document.title = `${title} | ${PROJECT_NAME}`;
 		const demoName = e.target.getAttribute("data-demo-name");
-		$iframe.setAttribute("src", `/examples/${demoName}`);
+		$iframe.setAttribute("src", `examples/${demoName}`);
 		$loader.classList.add("visible");
 		for (let i = 0; i < $listItems.length; i++) {
 			$listItems[i].classList.remove("active")
