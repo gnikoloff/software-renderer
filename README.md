@@ -2,7 +2,7 @@
 
 3D renderer written in C as an exercise to learn how graphics APIs such as OpenGL are implemented under the hood.
 
-![3D Geometry demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/geometry-demo.png?raw=true)
+![Shadow mapping demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/shadow-mapping-demo.png?raw=true)
 
 ## Features
 
@@ -58,13 +58,13 @@ npm start
 
 This will start a local web server you can open in your browser of choice.
 
+| ![3D Geometry demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/geometry-demo.png?raw=true) |
+|:--:|
+| Geometries |
+
 | ![Depth buffer demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/depth-buffer-demo.png?raw=true) |
 |:--:|
 | Visualised depth buffer |
-
-| ![Shadow mapping demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/shadow-mapping-demo.png?raw=true) |
-|:--:|
-| Shadow mapping |
 
 | ![Environment mapping demo preview](https://github.com/gnikoloff/software-renderer/blob/main/previews/environment-mapping-demo.png?raw=true) |
 |:--:|
