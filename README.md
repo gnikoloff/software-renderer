@@ -25,13 +25,13 @@
 Clone the project and run in the terminal:
 
 ```
-	make build DEMO_NAME=${DESIRED_DEMO_NAME}
-	make run DEMO_NAME=${DESIRED_DEMO_NAME}
+make build DEMO_NAME=DESIRED_DEMO_NAME
+make run DEMO_NAME=DESIRED_DEMO_NAME
 ```
 
 Where `DESIRED_DEMO_NAME` is the demo you want to build and run.
 
-Here is a full list of the demos:
+Here is a full list of the demo names:
 
 ```
 GEOMETRY_EXAMPLE
@@ -48,14 +48,14 @@ TUNNEL_EXAMPLE
 Clone the project and run in the terminal:
 
 ```
-	make build-emscripten DEMO_NAME=${DESIRED_DEMO_NAME}
+make build-emscripten DEMO_NAME=DESIRED_DEMO_NAME
 ```
 
 To run the web server to view it in a browser run:
 
 ```
-	npm i
-	npm start
+npm i
+npm start
 ```
 
 This will start a local web server you can open in your browser of choice.
