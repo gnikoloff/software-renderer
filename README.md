@@ -11,14 +11,12 @@
 3. Right hand Y-up coordinate system
 4. Uses [SDL](https://www.libsdl.org/) for access to graphics hardware, mouse, keyboard, etc.
 5. Supports native and web via [emscripten](https://emscripten.org/)
-5. Perspective correct interpolation
-6. Depth buffer
-7. Face culling
-8. Viewport clipping
-9. Loading and parsing:
-  9.1. Wavefront .OBJ files
-	9.2. PNG images
-10. Cube map sampling
+6. Perspective correct interpolation
+7. Depth buffer
+8. Face culling
+9. Viewport clipping
+10. Loading and parsing Wavefront .OBJ files and PNG images
+11. Cube map sampling
 
 ## Building for native
 
