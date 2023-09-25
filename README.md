@@ -16,8 +16,8 @@
 7. Face culling
 8. Viewport clipping
 9. Loading and parsing:
-   8.1. Wavefront .OBJ files
-	 8.2. PNG images
+  9.1. Wavefront .OBJ files
+	9.2. PNG images
 10. Cube map sampling
 
 ## Building for native
