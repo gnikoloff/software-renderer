@@ -35,6 +35,9 @@ tex2_t tex2_clone(tex2_t* t) {
 };
 
 uint32_t sample_texture(texture_2d_t* texture, float u, float v) {
+	if (texture == NULL) {
+		return 0xffff0000;
+	}
 	int texture_width = upng_get_width(texture);
 	int texture_height = upng_get_height(texture);
 	int tex_x = abs((int)(u * texture_width)) % texture_width;

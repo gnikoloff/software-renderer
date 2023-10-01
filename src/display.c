@@ -64,7 +64,7 @@ bool initialize_window(void) {
 	#endif
 
 	if (sdl_success != 0) {
-		fprintf(stderr, "Error initializing SDL.\n");
+		SDL_Log("Error initializing SDL.\n");
 		return false;
 	}
 
@@ -77,7 +77,7 @@ bool initialize_window(void) {
 		emscripten_set_canvas_element_size("canvas", (int)fullscreen_width, (int)fullscreen_height);
 		EMSCRIPTEN_RESULT is_set_callback = emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, NULL, true, emsc_window_size_changed);
 		if (is_set_callback != EMSCRIPTEN_RESULT_SUCCESS) {
-			printf("Unable to set resize callback!\n");
+			SDL_Log("Unable to set resize callback!\n");
 		}
 	#else
 		SDL_DisplayMode display_mode;
@@ -99,13 +99,13 @@ bool initialize_window(void) {
 	);
 
 	if (!window) {
-		fprintf(stderr, "Error creating SDL window");
+		SDL_Log("Error creating SDL window");
 		return false;
 	}
 
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	if (!renderer) {
-		fprintf(stderr, "Error creating SDL renderer");
+		SDL_Log("Error creating SDL renderer");
 		return false;
 	}
 

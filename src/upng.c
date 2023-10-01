@@ -1162,6 +1162,10 @@ upng_t* upng_new_from_file(const char *filename)
 
 void upng_free(upng_t* upng)
 {
+	if (upng == NULL) {
+		return;
+	}
+
 	/* deallocate image buffer */
 	if (upng->buffer != NULL) {
 		free(upng->buffer);

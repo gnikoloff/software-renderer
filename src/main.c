@@ -203,7 +203,7 @@ EM_JS(void, on_demo_ready, (), {
 });
 #endif
 
-int main(void) {
+int main(int argc, char **argv) {
 	#ifdef ENVIRONMENTMAPPING_EXAMPLE
 		set_window_scale(0.5);
 	#endif
